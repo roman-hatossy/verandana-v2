@@ -6,13 +6,10 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 mt-20">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Logo SVG - najlepsza jakość */}
-        <div className="flex justify-center mb-6">
-          <img 
-            src="/images/verandana_logo_losos.svg" 
-            alt="Verandana"
-            className="h-16 w-auto"
-          />
+        {/* Logo tekstowe jako fallback */}
+        <div className="text-center mb-6">
+          <div className="text-3xl font-bold text-orange-400">VERANDANA</div>
+          <div className="text-xs text-gray-400 tracking-widest">OGRODY ZIMOWE</div>
         </div>
         
         {/* Dane firmy */}
