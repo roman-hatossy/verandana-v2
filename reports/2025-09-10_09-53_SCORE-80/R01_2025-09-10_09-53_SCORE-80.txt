@@ -1,0 +1,14 @@
+RAPORT DOJRZAŁOŚCI KODU — R01
+Data: 2025-09-10_09-53
+Ocena łączna: 80 / 100 — B (dojrzały)
+
+Metryki:
+- ESLint problems: 0
+- TypeScript errors (0/1): 0
+- Critical vulns (npm audit): 1
+- First Load JS (kB): 28.9
+
+Wnioski:
+- Jeżeli CRIT > 0, najpierw aktualizacje zabezpieczeń.
+- TSERR = 0 oznacza zgodność typów; >0 obniża wynik o 20.
+- Dużo ESLint → stopniowe poprawki; każdy 5 problemów to -1 pkt (max -30).

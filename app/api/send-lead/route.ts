@@ -1,110 +1,69 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
-import { kv } from '@vercel/kv' // GENESIS H0: trwały rate-limit (KV)
+import { NextResponse, NextRequest } from 'next/server';
+import { Resend } from 'resend';
 
-type Body = {
-  name: string
-  email: string
-  phone: string
-  postalCode: string
-  type: string
-  deadline?: string
-  message?: string
-  files?: { name: string; url?: string; size?: number }[]
-  _honey?: string
+// Inicjalizacja Resend. Upewnij się, że zmienna środowiskowa jest ustawiona na produkcji.
+const resendApiKey = process.env.RESEND_API_KEY;
+if (!resendApiKey) {
+    console.error("KRYTYCZNY BŁĄD KONFIGURACJI: Brak RESEND_API_KEY.");
 }
+const resend = new Resend(resendApiKey);
 
-function ok(v: unknown): v is string {
-  return typeof v === 'string' && v.trim().length > 0
-}
-
-async function getResend() {
-  const key = process.env.RESEND_API_KEY
-  if (!ok(key)) throw new Error('RESEND_API_KEY missing')
-  const { Resend } = await import('resend')
-  return new Resend(key)
-}
-
-// GENESIS H0: KV rate limit z TTL; miękki fallback gdy KV nie jest skonfigurowane
-async function allowRequest(req: NextRequest) {
-  try {
-    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0] || '0.0.0.0'
-    const key = `rate:send-lead:${ip}`
-    const count = await kv.incr(key)
-    if (count === 1) await kv.expire(key, 600)
-    const MAX = 5
-    return count <= MAX
-  } catch {
-    return true
-  }
+// Uproszczona walidacja (Docelowo należy użyć Zod)
+function validateInput(data: any): boolean {
+  if (!data.name || !data.email || !data.phone || !data.consent) return false;
+  if (!/\S+@\S+\.\S+/.test(data.email)) return false;
+  return true;
 }
 
 export async function POST(req: NextRequest) {
+  // Globalny blok try...catch dla stabilności i logowania
   try {
-    if (!(await allowRequest(req))) {
-      return NextResponse.json({ error: 'Rate limit' }, { status: 429 })
+    // 1. Parsowanie ciała żądania
+    const data = await req.json();
+
+    // 2. Honeypot (Security)
+    if ((data as any)._honey) {
+      console.log("Honeypot triggered.");
+      return NextResponse.json({ message: 'Wiadomość wysłana pomyślnie.' }, { status: 200 });
     }
 
-    const body = (await req.json()) as Partial<Body>
-    if (ok(body._honey)) return NextResponse.json({ success: true })
-
-    const required: (keyof Body)[] = ['name', 'email', 'phone', 'postalCode', 'type']
-    for (const k of required) {
-      if (!ok((body as any)[k])) {
-        return NextResponse.json({ error: `Missing ${k}` }, { status: 400 })
-      }
+    // 3. Walidacja (Integrity)
+    if (!validateInput(data)) {
+      console.warn("Błąd walidacji danych.", data);
+      // HTTP 400 Bad Request
+      return NextResponse.json({ message: 'Niepoprawne dane formularza.' }, { status: 400 });
     }
 
-    const subject = `Nowe zapytanie — ${body.type} — ${body.postalCode}`
-    const text = [
-      `Imię i nazwisko: ${body.name}`,
-      `E-mail: ${body.email}`,
-      `Telefon: ${body.phone}`,
-      `Kod pocztowy: ${body.postalCode}`,
-      `Typ: ${body.type}`,
-      `Deadline: ${body.deadline ?? '-'}`,
-      `Wiadomość: ${body.message ?? '-'}`,
-      `Pliki: ${body.files?.map(f => `${f.name} (${f.size || 0}B) ${f.url || ''}`).join(', ') || '-'}`,
-    ].join('\n')
-
-    const html = `
-      <div style="font-family:Inter,system-ui,Arial;line-height:1.6">
-        <h2 style="margin:0 0 12px">Nowe zapytanie Verandana</h2>
-        <table cellpadding="6" style="border-collapse:collapse">
-          <tr><td><b>Imię i nazwisko</b></td><td>${body.name}</td></tr>
-          <tr><td><b>E-mail</b></td><td>${body.email}</td></tr>
-          <tr><td><b>Telefon</b></td><td>${body.phone}</td></tr>
-          <tr><td><b>Kod pocztowy</b></td><td>${body.postalCode}</td></tr>
-          <tr><td><b>Typ</b></td><td>${body.type}</td></tr>
-          <tr><td><b>Deadline</b></td><td>${body.deadline ?? '-'}</td></tr>
-          <tr><td valign="top"><b>Wiadomość</b></td><td>${(body.message ?? '-').toString().replace(/\n/g,'<br/>')}</td></tr>
-          <tr><td valign="top"><b>Pliki</b></td><td>${
-            Array.isArray(body.files) && body.files.length
-              ? body.files.map(f => `• <a href="${f.url || '#'}">${f.name}</a> ${f.size ? `(${f.size}B)` : ''}`).join('<br/>')
-              : '-'
-          }</td></tr>
-        </table>
-      </div>
-    `.trim()
-
-    const resend = await getResend()
-    const { error } = await resend.emails.send({
+    // 4. Wykonanie (Email Sending)
+    const emailResult = await resend.emails.send({
       from: 'Verandana <onboarding@resend.dev>',
       to: ['roman@verandana.pl'],
-      subject,
-      text,
-      html,
-    })
+      subject: `Nowy Lead z Landing Page Verandana - ${data.name}`,
+      html: `
+        <strong>Imię:</strong> ${data.name}<br>
+        <strong>Email:</strong> ${data.email}<br>
+        <strong>Telefon:</strong> ${data.phone}<br>
+        <strong>Typ:</strong> ${data.type || 'Brak'}<br>
+        <strong>Kod pocztowy:</strong> ${data.postalCode || 'Brak'}<br>
+        <strong>Wiadomość:</strong> ${data.message || 'Brak'}<br>
+      `,
+    });
 
-    if (error) {
-      console.error('Resend error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    // Sprawdzenie odpowiedzi z Resend
+    if (emailResult.error) {
+      // Logowanie specyficznego błędu Resend
+      console.error("RESEND API ERROR:", emailResult.error);
+      throw new Error(`Resend failed: ${emailResult.error.message}`);
     }
 
-    return NextResponse.json({ success: true })
-  } catch (e: any) {
-    console.error('API error:', e?.message || e)
-    const msg = e?.message?.includes('RESEND_API_KEY') ? 'Server misconfig' : 'Unknown error'
-    return NextResponse.json({ error: msg }, { status: 500 })
+    // HTTP 200 OK - Sukces
+    return NextResponse.json({ message: 'Wiadomość wysłana pomyślnie.', id: emailResult.data?.id }, { status: 200 });
+
+  } catch (error) {
+    // Logowanie błędu (Kluczowe dla diagnozy - pojawi się w logach serwera)
+    console.error("KRYTYCZNY BŁĄD API /send-lead:", error);
+    
+    // HTTP 500 Internal Server Error
+    return NextResponse.json({ message: 'Wystąpił wewnętrzny błąd serwera.' }, { status: 500 });
   }
 }
