@@ -1,15 +1,41 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+type Body = {
+  name: string; email: string; phone: string; postalCode: string; type: string;
+  deadline?: string; message?: string;
+  files?: { name: string; url?: string; size?: number }[];
+  _honey?: string; // honeypot pole musi być puste
+};
+
+const RATE = new Map<string, { count: number; ts: number }>();
+const WINDOW_MS = 10 * 60 * 1000; // 10 min
+const MAX_REQ = 5;
 
 function ok(v: unknown): v is string { return typeof v === 'string' && v.trim().length > 0; }
 
+async function getResend() {
+  const key = process.env.RESEND_API_KEY;
+  if (!ok(key)) throw new Error('RESEND_API_KEY missing');
+  const { Resend } = await import('resend');
+  return new Resend(key);
+}
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const required = ['name','email','phone','postalCode','type'];
-    for (const k of required) if (!ok((body as any)[k])) return NextResponse.json({error:`Missing ${k}`}, {status:400});
+    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0] || '0.0.0.0';
+    const now = Date.now();
+    const r = RATE.get(ip);
+    if (!r || now - r.ts > WINDOW_MS) RATE.set(ip, { count: 1, ts: now });
+    else if (r.count >= MAX_REQ) return NextResponse.json({ error: 'Rate limit' }, { status: 429 });
+    else RATE.set(ip, { count: r.count + 1, ts: r.ts });
+
+    const body = (await req.json()) as Body;
+    const required: (keyof Body)[] = ['name','email','phone','postalCode','type'];
+    for (const k of required) if (!ok(body[k])) return NextResponse.json({ error: `Missing ${k}` }, { status: 400 });
+
+    if (ok(body._honey)) return NextResponse.json({ success: true }, { status: 200 });
+
+    const resend = await getResend();
 
     const subject = `Nowe zapytanie — ${body.type} — ${body.postalCode}`;
     const text = [
@@ -20,7 +46,7 @@ export async function POST(req: Request) {
       `Typ: ${body.type}`,
       `Deadline: ${body.deadline ?? '-'}`,
       `Wiadomość: ${body.message ?? '-'}`,
-      `Pliki: ${(body.files?.map((f:any)=>`${f.name} (${f.size||0}B) ${f.url||''}`).join(', ')) || '-'}`,
+      `Pliki: ${(body.files?.map((f)=>`${f.name} (${f.size||0}B) ${f.url||''}`).join(', ')) || '-'}`,
     ].join('\n');
 
     const html = `
@@ -37,7 +63,7 @@ export async function POST(req: Request) {
           <tr><td valign="top"><b>Pliki</b></td><td>
             ${
               Array.isArray(body.files) && body.files.length
-              ? body.files.map((f:any)=>`<div>• <a href="${f.url||'#'}">${f.name}</a> ${f.size?`(${f.size}B)`:''}</div>`).join('')
+              ? body.files.map((f)=>`<div>• <a href="${f.url||'#'}">${f.name}</a> ${f.size?`(${f.size}B)`:''}</div>`).join('')
               : '-'
             }
           </td></tr>
@@ -52,9 +78,14 @@ export async function POST(req: Request) {
       html
     });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+      console.error('Resend error:', error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     return NextResponse.json({ success: true });
-  } catch (e:any) {
-    return NextResponse.json({ error: e?.message ?? 'Unknown error' }, { status: 500 });
+  } catch (e: any) {
+    console.error('API error:', e?.message || e);
+    const msg = e?.message?.includes('RESEND_API_KEY') ? 'Server misconfig' : 'Unknown error';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
