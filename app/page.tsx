@@ -6,6 +6,9 @@ export default function Home() {
   const [consent, setConsent] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [errors, setErrors] = useState<any>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedDate, setSelectedDate] = useState('')
+  const [comment, setComment] = useState('')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -56,7 +59,7 @@ export default function Home() {
     validateField(name, value)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     const newErrors: any = {}
@@ -87,7 +90,35 @@ export default function Home() {
       return
     }
     
-    alert('Formularz wysłany pomyślnie!')
+    setIsSubmitting(true)
+    
+    try {
+      const response = await fetch('/api/send-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          type: selectedType,
+          date: selectedDate,
+          comment: comment
+        })
+      })
+      
+      if (response.ok) {
+        alert('Dziękujemy! Wkrótce się odezwiemy.')
+        setFormData({ name: '', email: '', phone: '', postalCode: '' })
+        setSelectedType('')
+        setConsent(false)
+        setComment('')
+        setSelectedDate('')
+      } else {
+        alert('Błąd wysyłania. Spróbuj ponownie.')
+      }
+    } catch (error) {
+      alert('Błąd wysyłania. Spróbuj ponownie.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -209,7 +240,12 @@ export default function Home() {
 
           <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
             <h2 className="text-2xl font-bold mb-6">Jaka jest planowana data montażu?</h2>
-            <input type="date" className="px-4 py-3 border border-gray-300 rounded-lg" />
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-lg" 
+            />
           </div>
 
           <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
@@ -265,6 +301,8 @@ export default function Home() {
             <h2 className="text-2xl font-bold mb-2">Dodatkowe informacje</h2>
             <p className="text-gray-600 mb-6">Opcjonalnie. Opisz swoje oczekiwania...</p>
             <textarea 
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg h-32" 
               placeholder="Np. preferowane materiały, kolory, dodatkowe wymagania..."
             />
@@ -295,9 +333,12 @@ export default function Home() {
           <div className="text-center">
             <button 
               type="submit"
-              className="px-12 py-4 bg-blue-600 text-white text-lg font-bold rounded-lg hover:bg-blue-700 uppercase"
+              disabled={isSubmitting}
+              className={`px-12 py-4 text-white text-lg font-bold rounded-lg uppercase ${
+                isSubmitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
-              Wyślij zapytanie
+              {isSubmitting ? 'Wysyłanie...' : 'Wyślij zapytanie'}
             </button>
           </div>
         </form>
