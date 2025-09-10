@@ -1,0 +1,13 @@
+RAPORT ZGODNOŚCI Z GOOGLE ADS
+Data: $(date)
+
+CHECKLIST:
+[ ] Polityka Prywatności - dostępna pod /polityka-prywatnosci
+[ ] Regulamin - dostępny pod /regulamin  
+[ ] Dane kontaktowe w stopce (telefon + email)
+[ ] Dane rejestrowe firmy (NIP, REGON, adres)
+[ ] Robots.txt z dostępem dla AdsBot-Google
+[ ] Treść widoczna bez JavaScript (SSR)
+[ ] Core Web Vitals w normie (LCP<2.5s, CLS<0.1, INP<200ms)
+
+STATUS: Gotowe do zgłoszenia odwołania

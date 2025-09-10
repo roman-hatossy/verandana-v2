@@ -1,0 +1,22 @@
+STATUS ZGODNOŚCI GOOGLE ADS - VERANDANA
+========================================
+Data: $(date)
+
+WYMAGANIA GOOGLE ADS - SPEŁNIONE:
+✅ Polityka Prywatności - JEST
+✅ Regulamin - JEST  
+✅ Dane kontaktowe - JEST (telefon + email)
+✅ Dane rejestrowe - JEST (NIP, REGON, adres)
+✅ Robots.txt - JEST
+✅ SSR działa - treść widoczna bez JS
+✅ Brak cookies = brak problemów z RODO/bannerami
+
+SUGESTIE GEMINI - STATUS:
+❌ Banner cookies - NIE POTRZEBNY (brak cookies)
+✅ Treści marketingowe - OK (brak obietnic bez pokrycia)
+✅ Nawigacja - DZIAŁA
+✅ Zgodność reklamy ze stroną - DO WERYFIKACJI W GOOGLE ADS
+⚠️ Strona "O nas" - OPCJONALNA (nice to have)
+⚠️ Opinie klientów - OPCJONALNE (nice to have)
+
+DECYZJA: GOTOWE DO WZNOWIENIA

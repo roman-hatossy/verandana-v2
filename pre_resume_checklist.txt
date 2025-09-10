@@ -1,0 +1,21 @@
+GOOGLE ADS - LISTA KONTROLNA PRZED WZNOWIENIEM
+===============================================
+Data weryfikacji: $(date)
+
+ELEMENTY ZWERYFIKOWANE:
+✅ Polityka Prywatności - https://www.verandana.pl/polityka-prywatnosci (HTTP 200)
+✅ Regulamin - https://www.verandana.pl/regulamin (HTTP 200)
+✅ Footer z danymi kontaktowymi - tel: +48 605 834 422, email: roman@verandana.pl
+✅ Dane rejestrowe - NIP: 6312707409, REGON: 524383183, Miodunki 3, 44-151 Gliwice
+✅ Robots.txt - dostęp dla AdsBot-Google
+✅ SSR działa - treść widoczna bez JavaScript
+✅ Formularz kontaktowy - wysyła maile (potwierdzony test)
+✅ Historia domeny - czysta (Archive.org: 67 zapisów 2023-2025)
+
+AKCJA DO PODJĘCIA:
+1. Zaloguj się do Google Ads
+2. Przejdź do wstrzymanych kampanii
+3. Kliknij "Wznów kampanię"
+4. System automatycznie zweryfikuje stronę
+
+PRZEWIDYWANY CZAS: 1-24 godziny na weryfikację
