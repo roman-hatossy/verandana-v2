@@ -36,105 +36,94 @@ export default function HeroSection() {
 }
 
 === app/layout.tsx ===
-import "./globals.css";
+import './globals.css'
+import type { Metadata } from 'next'
+import { Toaster } from 'sonner' // GENESIS H0: Toaster dla powiadomień
+
+export const metadata: Metadata = {
+  title: 'Verandana',
+  description: 'Zapytanie ofertowe Verandana'
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pl">
-      <body className="min-h-screen bg-white">{children}</body>
+      <body>
+        {children}
+        <Toaster richColors closeButton position="top-center" /> {/* GENESIS H0: aktywacja toasta */}
+      </body>
     </html>
-  );
+  )
 }
 
 === app/api/send-lead/route.ts ===
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+import { Resend } from 'resend';
 
-type Body = {
-  name: string; email: string; phone: string; postalCode: string; type: string;
-  deadline?: string; message?: string;
-  files?: { name: string; url?: string; size?: number }[];
-  _honey?: string; // honeypot pole musi być puste
-};
+// Inicjalizacja Resend. Upewnij się, że zmienna środowiskowa jest ustawiona na produkcji.
+const resendApiKey = process.env.RESEND_API_KEY;
+if (!resendApiKey) {
+    console.error("KRYTYCZNY BŁĄD KONFIGURACJI: Brak RESEND_API_KEY.");
+}
+const resend = new Resend(resendApiKey);
 
-const RATE = new Map<string, { count: number; ts: number }>();
-const WINDOW_MS = 10 * 60 * 1000; // 10 min
-const MAX_REQ = 5;
-
-function ok(v: unknown): v is string { return typeof v === 'string' && v.trim().length > 0; }
-
-async function getResend() {
-  const key = process.env.RESEND_API_KEY;
-  if (!ok(key)) throw new Error('RESEND_API_KEY missing');
-  const { Resend } = await import('resend');
-  return new Resend(key);
+// Uproszczona walidacja (Docelowo należy użyć Zod)
+function validateInput(data: any): boolean {
+  if (!data.name || !data.email || !data.phone || !data.consent) return false;
+  if (!/\S+@\S+\.\S+/.test(data.email)) return false;
+  return true;
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  // Globalny blok try...catch dla stabilności i logowania
   try {
-    const ip = (req.headers.get('x-forwarded-for') || '').split(',')[0] || '0.0.0.0';
-    const now = Date.now();
-    const r = RATE.get(ip);
-    if (!r || now - r.ts > WINDOW_MS) RATE.set(ip, { count: 1, ts: now });
-    else if (r.count >= MAX_REQ) return NextResponse.json({ error: 'Rate limit' }, { status: 429 });
-    else RATE.set(ip, { count: r.count + 1, ts: r.ts });
+    // 1. Parsowanie ciała żądania
+    const data = await req.json();
 
-    const body = (await req.json()) as Body;
-    const required: (keyof Body)[] = ['name','email','phone','postalCode','type'];
-    for (const k of required) if (!ok(body[k])) return NextResponse.json({ error: `Missing ${k}` }, { status: 400 });
+    // 2. Honeypot (Security)
+    if ((data as any)._honey) {
+      console.log("Honeypot triggered.");
+      return NextResponse.json({ message: 'Wiadomość wysłana pomyślnie.' }, { status: 200 });
+    }
 
-    if (ok(body._honey)) return NextResponse.json({ success: true }, { status: 200 });
+    // 3. Walidacja (Integrity)
+    if (!validateInput(data)) {
+      console.warn("Błąd walidacji danych.", data);
+      // HTTP 400 Bad Request
+      return NextResponse.json({ message: 'Niepoprawne dane formularza.' }, { status: 400 });
+    }
 
-    const resend = await getResend();
-
-    const subject = `Nowe zapytanie — ${body.type} — ${body.postalCode}`;
-    const text = [
-      `Imię i nazwisko: ${body.name}`,
-      `E-mail: ${body.email}`,
-      `Telefon: ${body.phone}`,
-      `Kod pocztowy: ${body.postalCode}`,
-      `Typ: ${body.type}`,
-      `Deadline: ${body.deadline ?? '-'}`,
-      `Wiadomość: ${body.message ?? '-'}`,
-      `Pliki: ${(body.files?.map((f)=>`${f.name} (${f.size||0}B) ${f.url||''}`).join(', ')) || '-'}`,
-    ].join('\n');
-
-    const html = `
-      <div style="font-family:Inter,system-ui,Arial;line-height:1.6">
-        <h2 style="margin:0 0 12px">Nowe zapytanie Verandana</h2>
-        <table cellpadding="6" style="border-collapse:collapse">
-          <tr><td><b>Imię i nazwisko</b></td><td>${body.name}</td></tr>
-          <tr><td><b>E-mail</b></td><td>${body.email}</td></tr>
-          <tr><td><b>Telefon</b></td><td>${body.phone}</td></tr>
-          <tr><td><b>Kod pocztowy</b></td><td>${body.postalCode}</td></tr>
-          <tr><td><b>Typ</b></td><td>${body.type}</td></tr>
-          <tr><td><b>Deadline</b></td><td>${body.deadline ?? '-'}</td></tr>
-          <tr><td valign="top"><b>Wiadomość</b></td><td>${(body.message ?? '-').replace(/\n/g,'<br/>')}</td></tr>
-          <tr><td valign="top"><b>Pliki</b></td><td>
-            ${
-              Array.isArray(body.files) && body.files.length
-              ? body.files.map((f)=>`<div>• <a href="${f.url||'#'}">${f.name}</a> ${f.size?`(${f.size}B)`:''}</div>`).join('')
-              : '-'
-            }
-          </td></tr>
-        </table>
-      </div>`.trim();
-
-    const { error } = await resend.emails.send({
+    // 4. Wykonanie (Email Sending)
+    const emailResult = await resend.emails.send({
       from: 'Verandana <onboarding@resend.dev>',
       to: ['roman@verandana.pl'],
-      subject,
-      text,
-      html
+      subject: `Nowy Lead z Landing Page Verandana - ${data.name}`,
+      html: `
+        <strong>Imię:</strong> ${data.name}<br>
+        <strong>Email:</strong> ${data.email}<br>
+        <strong>Telefon:</strong> ${data.phone}<br>
+        <strong>Typ:</strong> ${data.type || 'Brak'}<br>
+        <strong>Kod pocztowy:</strong> ${data.postalCode || 'Brak'}<br>
+        <strong>Wiadomość:</strong> ${data.message || 'Brak'}<br>
+      `,
     });
 
-    if (error) {
-      console.error('Resend error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // Sprawdzenie odpowiedzi z Resend
+    if (emailResult.error) {
+      // Logowanie specyficznego błędu Resend
+      console.error("RESEND API ERROR:", emailResult.error);
+      throw new Error(`Resend failed: ${emailResult.error.message}`);
     }
-    return NextResponse.json({ success: true });
-  } catch (e: any) {
-    console.error('API error:', e?.message || e);
-    const msg = e?.message?.includes('RESEND_API_KEY') ? 'Server misconfig' : 'Unknown error';
-    return NextResponse.json({ error: msg }, { status: 500 });
+
+    // HTTP 200 OK - Sukces
+    return NextResponse.json({ message: 'Wiadomość wysłana pomyślnie.', id: emailResult.data?.id }, { status: 200 });
+
+  } catch (error) {
+    // Logowanie błędu (Kluczowe dla diagnozy - pojawi się w logach serwera)
+    console.error("KRYTYCZNY BŁĄD API /send-lead:", error);
+    
+    // HTTP 500 Internal Server Error
+    return NextResponse.json({ message: 'Wystąpił wewnętrzny błąd serwera.' }, { status: 500 });
   }
 }
 
@@ -176,24 +165,31 @@ export default function Page() {
         email: data.email,
         phone: data.phone,
         postalCode: data.postalCode,
-        deadline: data.deadline || '',
+        deadline: data.deadline,
         type: data.type,
-        message: data.message || '',
-        files: [],
-        _honey: (data as any)._honey || ''
+        message: data.message,
+        consent: data.consent,
+        _honey: (data as any)._honey,
       }
-      const res = await fetch('/api/send-lead', {
+      const response = await fetch('/api/send-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      if (!res.ok) throw new Error('Błąd wysyłki')
-      alert('Dziękujemy! Wiadomość wysłana.')
-      form.reset()
-      setErrors({})
+      
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(result.message || 'Sukces! Wiadomość wysłana.');
+        form.reset()
+        setErrors({})
+      } else {
+        console.error("API Error:", result);
+        alert(`Błąd: ${result.message || 'Wystąpił nieznany błąd.'}`);
+      }
     } catch (err) {
-      alert('Nie udało się wysłać. Spróbuj ponownie.')
-      console.error(err)
+      console.error("Network/Fetch Error:", err)
+      alert('Wystąpił błąd sieci. Sprawdź połączenie internetowe.')
     } finally {
       setIsSubmitting(false)
     }
@@ -202,22 +198,16 @@ export default function Page() {
   return (
     <main className="max-w-3xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Zapytanie</h1>
-
       <form onSubmit={handleSubmit} noValidate>
         <input type="text" name="name" placeholder="Imię i nazwisko" className="block w-full mb-2 p-3 border rounded" />
         {errors.name && <p className="text-red-500 text-sm mb-2">{errors.name}</p>}
-
         <input type="email" name="email" placeholder="E-mail" className="block w-full mb-2 p-3 border rounded" />
         {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email}</p>}
-
         <input type="tel" name="phone" placeholder="Telefon" className="block w-full mb-2 p-3 border rounded" />
         {errors.phone && <p className="text-red-500 text-sm mb-2">{errors.phone}</p>}
-
         <input type="text" name="postalCode" placeholder="Kod pocztowy" className="block w-full mb-2 p-3 border rounded" />
         {errors.postalCode && <p className="text-red-500 text-sm mb-2">{errors.postalCode}</p>}
-
         <input type="date" name="deadline" className="block w-full mb-2 p-3 border rounded" />
-
         <select name="type" className="block w-full mb-2 p-3 border rounded">
           <option value="">Wybierz typ</option>
           <option>Home Extension</option>
@@ -225,17 +215,13 @@ export default function Page() {
           <option>Patio Roof</option>
         </select>
         {errors.type && <p className="text-red-500 text-sm mb-2">{errors.type}</p>}
-
         <textarea name="message" placeholder="Wiadomość" className="block w-full mb-2 p-3 border rounded" rows={5}></textarea>
-
         <input type="text" name="_honey" className="hidden" tabIndex={-1} autoComplete="off" />
-
         <label className="flex items-start gap-2 mb-4">
           <input type="checkbox" name="consent" />
           <span>Wyrażam zgodę na kontakt w celu przygotowania oferty.</span>
         </label>
         {errors.consent && <p className="text-red-500 text-sm mb-4">{errors.consent}</p>}
-
         <button
           type="submit"
           disabled={isSubmitting}
@@ -247,69 +233,6 @@ export default function Page() {
     </main>
   )
 }
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('[GENESIS KROK 1] Funkcja handleSubmit została uruchomiona.');
-
-    const newErrors: any = {};
-
-    if (!formData.name || formData.name.length < 2) {
-      newErrors.name = 'Imię jest wymagane (min. 2 znaki)';
-    }
-    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Email jest wymagany';
-    }
-    if (!formData.phone || !/^[0-9]{9,12}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Telefon jest wymagany';
-    }
-    if (!formData.postalCode || !/^[0-9]{2}-[0-9]{3}$/.test(formData.postalCode)) {
-      newErrors.postalCode = 'Kod pocztowy jest wymagany';
-    }
-    if (!selectedType) {
-      newErrors.type = 'Wybierz typ konstrukcji';
-    }
-    if (!consent) {
-      newErrors.consent = 'Zgoda jest wymagana';
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length > 0) {
-      console.error('[GENESIS BŁĄD] Walidacja nie powiodła się. Błędy:', newErrors);
-      alert('Formularz zawiera błędy. Sprawdź poprawność wszystkich wymaganych pól.');
-      return;
-    }
-
-    console.log('[GENESIS KROK 2] Walidacja pól zakończona pomyślnie.');
-    setIsSubmitting(true);
-
-    try {
-      console.log('[GENESIS KROK 3] Próba wysłania danych na serwer...');
-      const response = await fetch('/api/send-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          type: selectedType,
-          date: selectedDate,
-          comment: comment
-        })
-      });
-
-      if (response.ok) {
-        console.log('[GENESIS SUKCES] Dane wysłane pomyślnie.');
-        alert('Dziękujemy! Wkrótce się odezwiemy.');
-      } else {
-        console.error('[GENESIS BŁĄD] Serwer zwrócił błąd.', await response.json());
-        alert('Błąd wysyłania. Spróbuj ponownie.');
-      }
-    } catch (error) {
-      console.error('[GENESIS KRYTYCZNY BŁĄD] Wystąpił błąd podczas wysyłania:', error);
-      alert('Błąd wysyłania. Spróbuj ponownie.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
 === app/globals.css ===
 @tailwind base;
