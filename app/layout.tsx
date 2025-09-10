@@ -1,6 +1,6 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Toaster } from 'sonner' // GENESIS H0: Toaster dla powiadomień
+import { Toaster } from 'sonner'
 
 export const metadata: Metadata = {
   title: 'Verandana',
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pl">
       <body>
         {children}
-        <Toaster richColors closeButton position="top-center" /> {/* GENESIS H0: aktywacja toasta */}
+        <Toaster richColors closeButton position="top-center" />
       </body>
     </html>
   )
