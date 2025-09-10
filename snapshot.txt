@@ -1,0 +1,668 @@
+=== app/_components/TileGrid.tsx ===
+const tiles = [
+  { title: "Home Extension", desc: "Rozszerzenie przestrzeni", icon: "🏠" },
+  { title: "Ogród klasyczny", desc: "Całoroczny ogród", icon: "☀️" },
+  { title: "Ogród sezonowy", desc: "Na ciepłe miesiące", icon: "❄️" },
+  { title: "Pergola", desc: "Konstrukcja ogrodowa", icon: "🌿" },
+  { title: "Pomoc w wyborze", desc: "Doradzimy najlepsze", icon: "❓" }
+];
+
+export default function TileGrid() {
+  return (
+    <section className="py-16 px-4">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tiles.map((tile, i) => (
+          <div key={i} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <div className="text-4xl mb-3">{tile.icon}</div>
+            <h3 className="text-xl font-bold mb-2">{tile.title}</h3>
+            <p className="text-gray-600">{tile.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+=== app/_components/InquiryForm.tsx ===
+"use client";
+import { useState } from "react";
+
+export default function InquiryForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [selectedType, setSelectedType] = useState("");
+  const [formProgress, setFormProgress] = useState(0);
+
+  const gardenTypes = [
+    { id: 'home-extension', name: 'Home Extension', icon: '🏠', desc: 'Rozszerzenie przestrzeni mieszkalnej' },
+    { id: 'classic-warm', name: 'Klasyczny ciepły', icon: '☀️', desc: 'Całoroczny, ogrzewany ogród' },
+    { id: 'seasonal-cold', name: 'Sezonowy zimny', icon: '❄️', desc: 'Użytkowany w ciepłych miesiącach' },
+    { id: 'pergola', name: 'Pergola', icon: '🌿', desc: 'Otwarta konstrukcja ogrodowa' },
+    { id: 'not-sure', name: 'Nie wiem', icon: '❓', desc: 'Pomożemy wybrać najlepsze rozwiązanie' }
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    const formData = new FormData(e.target as HTMLFormElement);
+    formData.append('gardenType', selectedType);
+    
+    try {
+      const response = await fetch("/api/lead", {
+        method: "POST",
+        body: formData
+      });
+      
+      const result = await response.json();
+      setMessage("Dziękujemy! Wkrótce się odezwiemy.");
+      
+      if (result.success) {
+        (e.target as HTMLFormElement).reset();
+        setSelectedType("");
+      }
+    } catch {
+      setMessage("Błąd. Spróbuj ponownie.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-6">
+      <div className="grid md:grid-cols-3 gap-6">
+        
+        {/* Sekcja 1: Wybór typu ogrodu */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold mb-4 text-gray-800">1. Wybierz typ ogrodu</h3>
+          <div className="space-y-3">
+            {gardenTypes.map(type => (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => setSelectedType(type.id)}
+                className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                  selectedType === type.id 
+                    ? 'border-orange-500 bg-orange-50' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className="flex items-center">
+                  <span className="text-2xl mr-3">{type.icon}</span>
+                  <div>
+                    <div className="font-semibold">{type.name}</div>
+                    <div className="text-sm text-gray-600">{type.desc}</div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Sekcja 2: Dane kontaktowe */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold mb-4 text-gray-800">2. Dane kontaktowe</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Imię i nazwisko *</label>
+              <input
+                name="name"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+              <input
+                name="email"
+                type="email"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Telefon *</label>
+              <input
+                name="phone"
+                type="tel"
+                required
+                placeholder="123 456 789"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Adres</label>
+              <input
+                name="address"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kod pocztowy</label>
+                <input
+                  name="postalCode"
+                  placeholder="00-950"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Miasto</label>
+                <input
+                  name="city"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sekcja 3: Dodatkowe informacje */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h3 className="text-xl font-bold mb-4 text-gray-800">3. Szczegóły</h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preferowany termin spotkania</label>
+              <input
+                name="meetingDate"
+                type="date"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Dodatkowe informacje</label>
+              <textarea
+                name="comment"
+                rows={5}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                placeholder="Opisz swoje oczekiwania..."
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Podsumowanie */}
+      <div className="mt-6 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg p-6">
+        <h3 className="text-lg font-bold mb-3">Podsumowanie zapytania:</h3>
+        <div className="text-sm">
+          <span className="font-medium">Wybrany typ:</span> {
+            selectedType ? gardenTypes.find(t => t.id === selectedType)?.name : 'Nie wybrano'
+          }
+        </div>
+      </div>
+
+      {/* Przycisk wysyłania */}
+      <div className="mt-6 text-center">
+        <button
+          type="submit"
+          disabled={isSubmitting || !selectedType}
+          className={`px-8 py-3 rounded-full font-semibold transition-all ${
+            isSubmitting || !selectedType
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              : 'bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 shadow-lg'
+          }`}
+        >
+          {isSubmitting ? 'Wysyłanie...' : 'Wyślij zapytanie'}
+        </button>
+      </div>
+
+      {message && (
+        <div className="mt-4 text-center p-3 rounded bg-green-100 text-green-700">
+          {message}
+        </div>
+      )}
+    </form>
+  );
+}
+
+=== app/_components/HeroSection.tsx ===
+export default function HeroSection() {
+  return (
+    <div className="relative h-96 bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
+      <div className="text-center text-white">
+        <h1 className="text-5xl md:text-7xl font-bold mb-4">VERANDANA</h1>
+        <p className="text-xl md:text-2xl">Nowoczesne ogrody zimowe</p>
+      </div>
+    </div>
+  );
+}
+
+=== app/layout.tsx ===
+import "./globals.css";
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pl">
+      <body className="min-h-screen bg-white">{children}</body>
+    </html>
+  );
+}
+
+=== app/api/send-lead/route.ts ===
+import { NextResponse } from 'next/server';
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function ok(v: unknown): v is string { return typeof v === 'string' && v.trim().length > 0; }
+
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+    const required = ['name','email','phone','postalCode','type'];
+    for (const k of required) if (!ok((body as any)[k])) return NextResponse.json({error:`Missing ${k}`}, {status:400});
+
+    const subject = `Nowe zapytanie — ${body.type} — ${body.postalCode}`;
+    const text = [
+      `Imię i nazwisko: ${body.name}`,
+      `E-mail: ${body.email}`,
+      `Telefon: ${body.phone}`,
+      `Kod pocztowy: ${body.postalCode}`,
+      `Typ: ${body.type}`,
+      `Deadline: ${body.deadline ?? '-'}`,
+      `Wiadomość: ${body.message ?? '-'}`,
+      `Pliki: ${(body.files?.map((f:any)=>`${f.name} (${f.size||0}B) ${f.url||''}`).join(', ')) || '-'}`,
+    ].join('\n');
+
+    const html = `
+      <div style="font-family:Inter,system-ui,Arial;line-height:1.6">
+        <h2 style="margin:0 0 12px">Nowe zapytanie Verandana</h2>
+        <table cellpadding="6" style="border-collapse:collapse">
+          <tr><td><b>Imię i nazwisko</b></td><td>${body.name}</td></tr>
+          <tr><td><b>E-mail</b></td><td>${body.email}</td></tr>
+          <tr><td><b>Telefon</b></td><td>${body.phone}</td></tr>
+          <tr><td><b>Kod pocztowy</b></td><td>${body.postalCode}</td></tr>
+          <tr><td><b>Typ</b></td><td>${body.type}</td></tr>
+          <tr><td><b>Deadline</b></td><td>${body.deadline ?? '-'}</td></tr>
+          <tr><td valign="top"><b>Wiadomość</b></td><td>${(body.message ?? '-').replace(/\n/g,'<br/>')}</td></tr>
+          <tr><td valign="top"><b>Pliki</b></td><td>
+            ${
+              Array.isArray(body.files) && body.files.length
+              ? body.files.map((f:any)=>`<div>• <a href="${f.url||'#'}">${f.name}</a> ${f.size?`(${f.size}B)`:''}</div>`).join('')
+              : '-'
+            }
+          </td></tr>
+        </table>
+      </div>`.trim();
+
+    const { error } = await resend.emails.send({
+      from: 'Verandana <onboarding@resend.dev>',
+      to: ['roman@verandana.pl'],
+      subject,
+      text,
+      html
+    });
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true });
+  } catch (e:any) {
+    return NextResponse.json({ error: e?.message ?? 'Unknown error' }, { status: 500 });
+  }
+}
+
+=== app/api/lead/route.ts ===
+import { NextResponse } from "next/server";
+export async function POST() {
+  return NextResponse.json({ success: true, message: "Dziękujemy!" });
+}
+
+=== app/page.tsx ===
+"use client";
+import { useState, useRef } from 'react'
+
+export default function Home() {
+  const [selectedType, setSelectedType] = useState('')
+  const [consent, setConsent] = useState(false)
+  const [files, setFiles] = useState<File[]>([])
+  const [errors, setErrors] = useState<any>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedDate, setSelectedDate] = useState('')
+  const [comment, setComment] = useState('')
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    postalCode: ''
+  })
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const validateField = (name: string, value: string) => {
+    const newErrors = { ...errors }
+    
+    switch(name) {
+      case 'name':
+        if (!value || value.length < 2) {
+          newErrors.name = 'Imię musi mieć min. 2 znaki'
+        } else {
+          delete newErrors.name
+        }
+        break
+      case 'email':
+        if (!value || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          newErrors.email = 'Nieprawidłowy email'
+        } else {
+          delete newErrors.email
+        }
+        break
+      case 'phone':
+        if (!value || !/^[0-9]{9,12}$/.test(value.replace(/\s/g, ''))) {
+          newErrors.phone = 'Telefon: 9-12 cyfr'
+        } else {
+          delete newErrors.phone
+        }
+        break
+      case 'postalCode':
+        if (!value || !/^[0-9]{2}-[0-9]{3}$/.test(value)) {
+          newErrors.postalCode = 'Format: 00-000'
+        } else {
+          delete newErrors.postalCode
+        }
+        break
+    }
+    
+    setErrors(newErrors)
+  }
+
+  const handleInputChange = (name: string, value: string) => {
+    setFormData({ ...formData, [name]: value })
+    validateField(name, value)
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    
+    const newErrors: any = {}
+    
+    if (!formData.name || formData.name.length < 2) {
+      newErrors.name = 'Imię jest wymagane (min. 2 znaki)'
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email jest wymagany'
+    }
+    if (!formData.phone || !/^[0-9]{9,12}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Telefon jest wymagany'
+    }
+    if (!formData.postalCode || !/^[0-9]{2}-[0-9]{3}$/.test(formData.postalCode)) {
+      newErrors.postalCode = 'Kod pocztowy jest wymagany'
+    }
+    if (!selectedType) {
+      newErrors.type = 'Wybierz typ konstrukcji'
+    }
+    if (!consent) {
+      newErrors.consent = 'Zgoda jest wymagana'
+    }
+    
+    setErrors(newErrors)
+    
+    if (Object.keys(newErrors).length > 0) {
+      alert('Popraw błędy w formularzu')
+      return
+    }
+    
+    setIsSubmitting(true)
+    
+    try {
+      const response = await fetch('/api/send-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          type: selectedType,
+          date: selectedDate,
+          comment: comment
+        })
+      })
+      
+      if (response.ok) {
+        alert('Dziękujemy! Wkrótce się odezwiemy.')
+        setFormData({ name: '', email: '', phone: '', postalCode: '' })
+        setSelectedType('')
+        setConsent(false)
+        setComment('')
+        setSelectedDate('')
+      } else {
+        alert('Błąd wysyłania. Spróbuj ponownie.')
+      }
+    } catch (error) {
+      alert('Błąd wysyłania. Spróbuj ponownie.')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || [])
+    setFiles(prev => [...prev, ...selectedFiles])
+  }
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index))
+  }
+
+  const types = [
+    { id: 'home-extension', name: 'Home Extension', desc: 'Nowoczesna bryła z płaskim dachem', image: '/images/home-extension-day.webp' },
+    { id: 'classic-warm', name: 'Klasyczny ciepły', desc: 'Szlachetny detal i elegancja', image: '/images/ogrod-klasyczny-day.webp' },
+    { id: 'seasonal-cold', name: 'Sezonowy zimny', desc: 'Idealny na wiosnę i lato', image: '/images/ogrod-sezonowy-day.webp' },
+    { id: 'pergola', name: 'Pergola Bioclimatic', desc: 'Lamele regulowane', image: '/images/pergola-bioclimatic-day.webp' },
+    { id: 'unknown', name: 'Nie wiem', desc: 'Potrzebuję porady eksperta', image: '/images/help-me.webp' }
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-10">
+      <div className="max-w-5xl mx-auto px-6">
+        <h1 className="text-4xl font-bold text-center mb-2">Otrzymaj darmową wycenę</h1>
+        <p className="text-center text-gray-600 mb-8">Wypełnij formularz, a nasi specjaliści przygotują dla Ciebie indywidualną ofertę</p>
+
+        <form onSubmit={handleSubmit}>
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold mb-6">Podstawowe informacje</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Imię <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  className={`w-full px-4 py-3 border rounded-lg ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="Jan Kowalski"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  onBlur={(e) => validateField('name', e.target.value)}
+                />
+                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  className={`w-full px-4 py-3 border rounded-lg ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="jan@example.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onBlur={(e) => validateField('email', e.target.value)}
+                />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Telefon <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  className={`w-full px-4 py-3 border rounded-lg ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="123 456 789"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  onBlur={(e) => validateField('phone', e.target.value)}
+                />
+                {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Kod pocztowy <span className="text-red-500">*</span>
+                </label>
+                <input 
+                  className={`w-full px-4 py-3 border rounded-lg ${errors.postalCode ? 'border-red-500' : 'border-gray-300'}`}
+                  placeholder="00-000"
+                  value={formData.postalCode}
+                  onChange={(e) => handleInputChange('postalCode', e.target.value)}
+                  onBlur={(e) => validateField('postalCode', e.target.value)}
+                />
+                {errors.postalCode && <p className="text-red-500 text-xs mt-1">{errors.postalCode}</p>}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold mb-6">
+              Jaki typ konstrukcji Cię interesuje? <span className="text-red-500">*</span>
+            </h2>
+            {errors.type && <p className="text-red-500 text-sm mb-4">{errors.type}</p>}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {types.map(type => (
+                <button
+                  key={type.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedType(type.id)
+                    const newErrors = { ...errors }
+                    delete newErrors.type
+                    setErrors(newErrors)
+                  }}
+                  className={`rounded-xl overflow-hidden border-2 transition-all hover:shadow-lg ${
+                    selectedType === type.id ? 'border-blue-500' : 'border-gray-200'
+                  }`}
+                >
+                  <div className="h-32 bg-gray-100">
+                    <img src={type.image} alt={type.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="p-4 text-left">
+                    <h3 className="font-semibold text-sm">{type.name}</h3>
+                    <p className="text-xs text-gray-600 mt-1">{type.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold mb-6">Jaka jest planowana data montażu?</h2>
+            <input 
+              type="date" 
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-4 py-3 border border-gray-300 rounded-lg" 
+            />
+          </div>
+
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold mb-2">Dodaj zdjęcia lub plany</h2>
+            <p className="text-gray-600 mb-6">Opcjonalnie. Pomogą nam lepiej zrozumieć Twoje potrzeby.</p>
+            
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center bg-gray-50 hover:bg-gray-100 cursor-pointer"
+            >
+              <div className="text-4xl mb-4">📎</div>
+              <p className="font-medium mb-2">Dodaj zdjęcia lub plany</p>
+              <p className="text-sm text-gray-500 mb-4">Obsługiwane: obrazy (PNG/JPG/WebP) i PDF · Limit: 5 MB / plik</p>
+              <button type="button" className="px-6 py-2 bg-white border border-gray-300 rounded-lg text-sm">
+                Wybierz pliki
+              </button>
+              <p className="text-sm text-gray-400 mt-2">lub upuść tutaj</p>
+              <input 
+                ref={fileInputRef} 
+                type="file" 
+                className="hidden" 
+                multiple 
+                accept="image/*,.pdf"
+                onChange={handleFileSelect}
+              />
+            </div>
+
+            {files.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {files.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">📄</span>
+                      <div>
+                        <p className="text-sm font-medium">{file.name}</p>
+                        <p className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeFile(index)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Usuń
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <h2 className="text-2xl font-bold mb-2">Dodatkowe informacje</h2>
+            <p className="text-gray-600 mb-6">Opcjonalnie. Opisz swoje oczekiwania...</p>
+            <textarea 
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg h-32" 
+              placeholder="Np. preferowane materiały, kolory, dodatkowe wymagania..."
+            />
+          </div>
+
+          <div className="bg-white rounded-xl p-8 shadow-sm mb-6">
+            <label className="flex items-start cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={consent}
+                onChange={(e) => {
+                  setConsent(e.target.checked)
+                  if (e.target.checked) {
+                    const newErrors = { ...errors }
+                    delete newErrors.consent
+                    setErrors(newErrors)
+                  }
+                }}
+                className="mt-1 mr-3 w-5 h-5"
+              />
+              <span className="text-sm text-gray-700">
+                Wyrażam zgodę na przetwarzanie moich danych osobowych <span className="text-red-500">*</span>
+              </span>
+            </label>
+            {errors.consent && <p className="text-red-500 text-xs mt-2">{errors.consent}</p>}
+          </div>
+
+          <div className="text-center">
+            <button 
+              type="submit"
+              disabled={isSubmitting}
+              className={`px-12 py-4 text-white text-lg font-bold rounded-lg uppercase ${
+                isSubmitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
+            >
+              {isSubmitting ? 'Wysyłanie...' : 'Wyślij zapytanie'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+=== app/globals.css ===
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
