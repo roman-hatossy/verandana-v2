@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 // ŚCIEŻKA: app/page.tsx
 
 import TileGrid from "@/components/TileGrid";
@@ -39,6 +40,7 @@ export default function Home() {
           <InquiryForm />
         </section>
       </div>
+      <Footer />
     </main>
   );
 }
