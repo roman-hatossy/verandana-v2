@@ -106,3 +106,66 @@ export default function Page() {
     </main>
   )
 }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('[GENESIS KROK 1] Funkcja handleSubmit została uruchomiona.');
+
+    const newErrors: any = {};
+
+    if (!formData.name || formData.name.length < 2) {
+      newErrors.name = 'Imię jest wymagane (min. 2 znaki)';
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email jest wymagany';
+    }
+    if (!formData.phone || !/^[0-9]{9,12}$/.test(formData.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Telefon jest wymagany';
+    }
+    if (!formData.postalCode || !/^[0-9]{2}-[0-9]{3}$/.test(formData.postalCode)) {
+      newErrors.postalCode = 'Kod pocztowy jest wymagany';
+    }
+    if (!selectedType) {
+      newErrors.type = 'Wybierz typ konstrukcji';
+    }
+    if (!consent) {
+      newErrors.consent = 'Zgoda jest wymagana';
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      console.error('[GENESIS BŁĄD] Walidacja nie powiodła się. Błędy:', newErrors);
+      alert('Formularz zawiera błędy. Sprawdź poprawność wszystkich wymaganych pól.');
+      return;
+    }
+
+    console.log('[GENESIS KROK 2] Walidacja pól zakończona pomyślnie.');
+    setIsSubmitting(true);
+
+    try {
+      console.log('[GENESIS KROK 3] Próba wysłania danych na serwer...');
+      const response = await fetch('/api/send-lead', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          type: selectedType,
+          date: selectedDate,
+          comment: comment
+        })
+      });
+
+      if (response.ok) {
+        console.log('[GENESIS SUKCES] Dane wysłane pomyślnie.');
+        alert('Dziękujemy! Wkrótce się odezwiemy.');
+      } else {
+        console.error('[GENESIS BŁĄD] Serwer zwrócił błąd.', await response.json());
+        alert('Błąd wysyłania. Spróbuj ponownie.');
+      }
+    } catch (error) {
+      console.error('[GENESIS KRYTYCZNY BŁĄD] Wystąpił błąd podczas wysyłania:', error);
+      alert('Błąd wysyłania. Spróbuj ponownie.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
