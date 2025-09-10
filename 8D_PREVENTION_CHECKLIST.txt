@@ -1,0 +1,5 @@
+• ENV na Vercel: RESEND_API_KEY = ustawione w Prod/Preview/Dev
+• DKIM/Resend: domena verandana.pl = VERIFIED (panel Resend → Domains)
+• Brak SDK init w top-level (lazy-init w handlerach)
+• CI: build przechodzi na main
+• Formularz: honeypot pole ukryte + serwer sprawdza _honey
