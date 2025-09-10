@@ -8,31 +8,31 @@ const gardenTypes = [
     id: 'home-extension', 
     name: 'Home Extension', 
     desc: 'Nowoczesna bryła z płaskim dachem',
-    image: '/images/home-extension.jpg'
+    image: '/images/home-extension-day.webp'
   },
   { 
     id: 'classic-warm', 
     name: 'Klasyczny ciepły', 
     desc: 'Szlachetny detal i elegancja',
-    image: '/images/classic-warm.jpg'
+    image: '/images/ogrod-klasyczny-day.webp'
   },
   { 
     id: 'seasonal-cold', 
     name: 'Sezonowy zimny', 
     desc: 'Idealny na wiosnę i lato',
-    image: '/images/seasonal-cold.jpg'
+    image: '/images/ogrod-sezonowy-day.webp'
   },
   { 
     id: 'pergola', 
     name: 'Pergola Bioclimatic', 
     desc: 'Lamele regulowane',
-    image: '/images/pergola.jpg'
+    image: '/images/pergola-bioclimatic-day.webp'
   },
   { 
     id: 'not-sure', 
     name: 'Nie wiem', 
     desc: 'Potrzebuję porady eksperta',
-    image: '/images/help.jpg'
+    image: '/images/help-me.webp'
   }
 ];
 
@@ -50,7 +50,6 @@ export default function HomePage() {
             Odkryj, jak ogród zimowy otwarty na naturę staje się sercem Twojego domu przez cały rok.
           </p>
           
-          {/* Sekcja z kafelkami */}
           <div className="text-center mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Jaki typ konstrukcji Cię interesuje?
@@ -72,9 +71,6 @@ export default function HomePage() {
                       src={type.image} 
                       alt={type.name}
                       className="w-full h-40 object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHRleHQtYW5jaG9yPSJtaWRkbGUiIHg9IjIwMCIgeT0iMTUwIiBzdHlsZT0iZmlsbDojOTk5O2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1zaXplOjE4cHg7Zm9udC1mYW1pbHk6QXJpYWwsc2Fucy1zZXJpZiI+SW1hZ2U8L3RleHQ+PC9zdmc+';
-                      }}
                     />
                   </div>
                   <div className="p-3 bg-white">
