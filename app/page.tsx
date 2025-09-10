@@ -1,46 +1,56 @@
-import Footer from "../components/Footer";
-// ŚCIEŻKA: app/page.tsx
+'use client';
+import React, { useState, useEffect } from 'react';
+import InquiryForm from '../components/InquiryForm';
+import Footer from '../components/Footer';
 
-import TileGrid from "@/components/TileGrid";
-import InquiryForm from "@/components/InquiryForm";
+const gardenTypes = [
+  { id: 'home-extension', name: 'Home Extension', desc: 'Rozszerzenie przestrzeni' },
+  { id: 'classic-warm', name: 'Ogród klasyczny', desc: 'Całoroczny, ogrzewany' },
+  { id: 'seasonal-cold', name: 'Ogród sezonowy', desc: 'Użytkowany w ciepłych miesiącach' },
+  { id: 'pergola', name: 'Pergola', desc: 'Otwarta konstrukcja' },
+  { id: 'not-sure', name: 'Nie wiem', desc: 'Pomoc w wyborze' }
+];
 
-export default function Home() {
-  
-  // === BLOK DIAGNOSTYCZNY OMNIBUS FLASH ===
-  // Poniższy kod sprawdzi, czy komponenty nie są 'undefined'.
-  // Jeśli błąd nadal występuje, problem leży w pliku jednego z tych komponentów.
-  if (!TileGrid || !InquiryForm) {
-    return (
-      <div style={{ padding: '40px', fontFamily: 'monospace', color: 'red', fontSize: '18px' }}>
-        <h1>Błąd Krytyczny Ładowania Komponentu</h1>
-        <p>Jeden z głównych komponentów strony (TileGrid lub InquiryForm) nie został poprawnie załadowany.</p>
-        <p>Sprawdź, czy pliki `components/TileGrid.tsx` oraz `components/InquiryForm.tsx` zawierają na końcu linii `export default NazwaKomponentu;`</p>
-        <p>Status TileGrid: {String(!!TileGrid)}</p>
-        <p>Status InquiryForm: {String(!!InquiryForm)}</p>
-      </div>
-    );
-  }
-  // === KONIEC BLOKU DIAGNOSTYCZNEGO ===
+export default function HomePage() {
+  const [selectedType, setSelectedType] = useState('');
 
   return (
-    <main className="bg-slate-50 min-h-screen py-12 sm:py-16">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-slate-800 tracking-tight">
-          Nowoczesne ogrody zimowe
+    <div className="bg-gray-100 min-h-screen">
+      <header className="py-12 px-6 text-center bg-white shadow-sm">
+        <h1 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight mb-4">
+          Wprowadź do domu harmonię i nową przestrzeń do życia.
         </h1>
-        <p className="mt-4 max-w-2xl mx-auto text-center text-lg text-slate-600">
-          Odkryj nasze realizacje i poproś o bezpłatną wycenę.
+        <p className="text-lg text-slate-600 max-w-3xl mx-auto mb-8">
+          Odkryj, jak ogród zimowy otwarty na naturę staje się sercem Twojego domu przez cały rok.
         </p>
-
-        {/* Siatka z typami konstrukcji */}
-        <TileGrid />
-
-        {/* Sekcja z formularzem */}
-        <section id="inquiry-form" className="mt-16 sm:mt-24">
-          <InquiryForm />
-        </section>
-      </div>
+        
+        {/* Kafelki wyboru typu - przeniesione do nagłówka */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {gardenTypes.map(type => (
+              <button 
+                key={type.id} 
+                type="button" 
+                onClick={() => setSelectedType(type.id)}
+                className={`p-4 text-center rounded-lg border-2 transition-all ${
+                  selectedType === type.id 
+                    ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500' 
+                    : 'border-gray-200 hover:border-gray-400 bg-white'
+                }`}
+              >
+                <div className="font-semibold text-sm">{type.name}</div>
+                <div className="text-xs text-gray-500 mt-1">{type.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+      
+      <main className="max-w-6xl mx-auto p-6">
+        <InquiryForm preselectedType={selectedType} />
+      </main>
+      
       <Footer />
-    </main>
+    </div>
   );
 }

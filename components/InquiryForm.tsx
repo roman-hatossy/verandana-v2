@@ -1,6 +1,4 @@
-// ŚCIEŻKA: components/InquiryForm.tsx
 'use client'
-
 import React, { useState, useEffect } from 'react'
 import Calendar from './Calendar'
 import FileUpload, { type FileData } from './FileUpload'
@@ -13,8 +11,12 @@ interface ValidationErrors {
   postalCode?: string;
 }
 
-export default function InquiryForm() {
-  const [selectedType, setSelectedType] = useState<string>('')
+interface InquiryFormProps {
+  preselectedType?: string;
+}
+
+export default function InquiryForm({ preselectedType = '' }: InquiryFormProps) {
+  const [selectedType, setSelectedType] = useState<string>(preselectedType)
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [files, setFiles] = useState<FileData[]>([])
   const [formProgress, setFormProgress] = useState(0)
@@ -29,6 +31,13 @@ export default function InquiryForm() {
   const [errors, setErrors] = useState<ValidationErrors>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Aktualizuj selectedType gdy zmieni się prop
+  useEffect(() => {
+    if (preselectedType) {
+      setSelectedType(preselectedType);
+    }
+  }, [preselectedType]);
 
   const validateField = (field: 'email' | 'phone' | 'postalCode', value: string) => {
     const newErrors = { ...errors }
@@ -105,19 +114,13 @@ export default function InquiryForm() {
     }
   }
 
-  const gardenTypes = [
-    { id: 'home-extension', name: 'Home Extension', desc: 'Rozszerzenie przestrzeni' },
-    { id: 'classic-warm', name: 'Ogród klasyczny', desc: 'Całoroczny, ogrzewany' },
-    { id: 'seasonal-cold', name: 'Ogród sezonowy', desc: 'Użytkowany w ciepłych miesiącach' },
-    { id: 'pergola', name: 'Pergola', desc: 'Otwarta konstrukcja' },
-    { id: 'not-sure', name: 'Nie wiem', desc: 'Pomoc w wyborze' }
-  ];
-
   return (
     <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 relative bg-white rounded-2xl shadow-2xl border border-slate-200">
         <div className="mb-8">
             <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Zapytanie o wycenę</h2>
-            <p className="text-center text-slate-500">Wypełnij formularz, a my przygotujemy dla Ciebie ofertę.</p>
+            <p className="text-center text-slate-500">
+              {selectedType ? 'Wypełnij formularz dla wybranego typu ogrodu.' : 'Wybierz typ ogrodu powyżej i wypełnij formularz.'}
+            </p>
             <div className="flex justify-between items-center mt-6 mb-2">
                 <span className="text-sm font-medium text-gray-700">Postęp</span>
                 <span className="text-sm font-medium text-blue-600">{formProgress}%</span>
@@ -129,20 +132,7 @@ export default function InquiryForm() {
 
         <div className="space-y-8">
             <div>
-            <label className="block text-lg font-semibold text-gray-800 mb-4">1. Wybierz typ konstrukcji *</label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-                {gardenTypes.map(type => (
-                <button key={type.id} type="button" onClick={() => setSelectedType(type.id)}
-                    className={`w-full p-3 text-center rounded-lg border-2 transition-all ${selectedType === type.id ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500' : 'border-gray-200 hover:border-gray-400'}`}>
-                    <div className="font-semibold text-sm">{type.name}</div>
-                    <div className="text-xs text-gray-500">{type.desc}</div>
-                </button>
-                ))}
-            </div>
-            </div>
-
-            <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">2. Dane kontaktowe</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dane kontaktowe</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Imię i nazwisko *</label>
@@ -167,7 +157,7 @@ export default function InquiryForm() {
             </div>
             
             <div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">3. Dodatkowe informacje (opcjonalnie)</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dodatkowe informacje (opcjonalnie)</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Preferowany termin kontaktu</label>
