@@ -99,7 +99,7 @@ export default function InquiryForm({ preselectedType = '' }: InquiryFormProps) 
           <input type="text" value={postalCode} onChange={e=>setPostalCode(e.target.value)} className="w-full border px-3 py-2 rounded"/>
         </div>
         <div>
-          <label className="block text-sm font-medium">Preferowany termin kontaktu</label>
+          <label className="block text-sm font-medium">Planowany termin montażu</label>
           <Calendar selectedDate={selectedDate} onDateSelect={setSelectedDate}/>
         </div>
         <div>
