@@ -2,7 +2,6 @@
 import * as React from 'react';
 
 export type UploadStatus = 'idle' | 'uploading' | 'done' | 'error';
-
 export interface FileData {
   id: string;
   file: File;
@@ -14,8 +13,8 @@ export interface FileData {
 }
 
 type Props = {
-  files?: FileData[];
-  onFilesChange?: (files: FileData[]) => void;
+  files: FileData[];
+  onFilesChange: (files: FileData[] | ((currentFiles: FileData[]) => FileData[])) => void;
   onError?: (message: string, type?: 'error' | 'success') => void;
   accept?: string;
   maxFiles?: number;
@@ -24,7 +23,7 @@ type Props = {
 };
 
 const DEFAULT_MAX_FILES = 5;
-const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
+const DEFAULT_MAX_SIZE = 10 * 1024 * 1024;
 
 function humanSize(n: number) {
   const u = ['B', 'KB', 'MB', 'GB'];
@@ -34,28 +33,16 @@ function humanSize(n: number) {
   return `${num} ${u[i]}`;
 }
 
-function useControlled<T>(ext: T | undefined, initial: T, onChange?: (v: T) => void) {
-  const [local, setLocal] = React.useState<T>(ext ?? initial);
-  React.useEffect(() => { if (typeof ext !== 'undefined') setLocal(ext); }, [ext]);
-  const set = React.useCallback(
-    (v: T | ((prev: T) => T)) => {
-      const nextValue = typeof v === 'function' ? (v as (prev: T) => T)(local) : v;
-      if (typeof ext === 'undefined') setLocal(nextValue);
-      onChange?.(nextValue);
-    }, [ext, onChange, local]
-  );
-  return [local, set] as const;
-}
-
 export default function FileUpload({
-  files: extFiles, onFilesChange, onError,
+  files,
+  onFilesChange,
+  onError,
   accept = 'image/*,application/pdf',
   maxFiles = DEFAULT_MAX_FILES,
   maxSizeBytes = DEFAULT_MAX_SIZE,
   className,
 }: Props) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const [files, setFiles] = useControlled<FileData[]>(extFiles, [], onFilesChange);
 
   const addFiles = (list: FileList | File[]) => {
     const arr = Array.from(list);
@@ -72,13 +59,15 @@ export default function FileUpload({
       id: crypto.randomUUID(),
       file: f, name: f.name, size: f.size, progress: 0, status: 'uploading',
     }));
-    setFiles(prev => [...prev, ...newItems]);
+
+    const updatedFiles = [...files, ...newItems];
+    onFilesChange(updatedFiles);
 
     newItems.forEach(item => {
       let ticks = 0;
       const iv = setInterval(() => {
         ticks++;
-        setFiles(prev => prev.map(f => f.id === item.id ? {
+        onFilesChange(currentFiles => currentFiles.map(f => f.id === item.id ? {
           ...f,
           progress: Math.min(100, f.progress + 10),
           status: f.progress + 10 >= 100 ? 'done' : 'uploading',
