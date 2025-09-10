@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -7,13 +6,11 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 mt-20">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Logo */}
+        {/* Logo SVG - najlepsza jakość */}
         <div className="flex justify-center mb-6">
-          <Image 
-            src="/images/verandana_logo_losos.webp" 
-            alt="Verandana Logo"
-            width={200}
-            height={60}
+          <img 
+            src="/images/verandana_logo_losos.svg" 
+            alt="Verandana"
             className="h-16 w-auto"
           />
         </div>
