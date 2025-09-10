@@ -128,110 +128,30 @@ export async function POST(req: NextRequest) {
 }
 
 === app/page.tsx ===
-'use client'
-import { useState } from 'react'
+import TileGrid from "@/components/TileGrid";
+import InquiryForm from "@/components/InquiryForm";
 
-export default function Page() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errors, setErrors] = useState<Record<string,string>>({})
-
-  function validate(form: HTMLFormElement) {
-    const data = Object.fromEntries(new FormData(form).entries())
-    const e: Record<string,string> = {}
-    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    const zipRe = /^[0-9]{2}-?[0-9]{3}$/
-
-    if (!data.name) e.name = 'Podaj imię i nazwisko'
-    if (!data.email || !emailRe.test(String(data.email))) e.email = 'Podaj poprawny e-mail'
-    if (!data.phone) e.phone = 'Podaj telefon'
-    if (!data.postalCode || !zipRe.test(String(data.postalCode))) e.postalCode = 'Kod np. 44-100'
-    if (!data.type) e.type = 'Wybierz typ'
-    if (!data.consent) e.consent = 'Zaznacz zgodę'
-    return { ok: Object.keys(e).length === 0, e, data }
-  }
-
-  async function handleSubmit(ev: React.FormEvent<HTMLFormElement>) {
-    ev.preventDefault()
-    if (isSubmitting) return
-    const form = ev.currentTarget
-    const { ok, e, data } = validate(form)
-    setErrors(e)
-    if (!ok) return
-
-    setIsSubmitting(true)
-    try {
-      const payload = {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        postalCode: data.postalCode,
-        deadline: data.deadline,
-        type: data.type,
-        message: data.message,
-        consent: data.consent,
-        _honey: (data as any)._honey,
-      }
-      const response = await fetch('/api/send-lead', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(result.message || 'Sukces! Wiadomość wysłana.');
-        form.reset()
-        setErrors({})
-      } else {
-        console.error("API Error:", result);
-        alert(`Błąd: ${result.message || 'Wystąpił nieznany błąd.'}`);
-      }
-    } catch (err) {
-      console.error("Network/Fetch Error:", err)
-      alert('Wystąpił błąd sieci. Sprawdź połączenie internetowe.')
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
-
+export default function Home() {
   return (
-    <main className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Zapytanie</h1>
-      <form onSubmit={handleSubmit} noValidate>
-        <input type="text" name="name" placeholder="Imię i nazwisko" className="block w-full mb-2 p-3 border rounded" />
-        {errors.name && <p className="text-red-500 text-sm mb-2">{errors.name}</p>}
-        <input type="email" name="email" placeholder="E-mail" className="block w-full mb-2 p-3 border rounded" />
-        {errors.email && <p className="text-red-500 text-sm mb-2">{errors.email}</p>}
-        <input type="tel" name="phone" placeholder="Telefon" className="block w-full mb-2 p-3 border rounded" />
-        {errors.phone && <p className="text-red-500 text-sm mb-2">{errors.phone}</p>}
-        <input type="text" name="postalCode" placeholder="Kod pocztowy" className="block w-full mb-2 p-3 border rounded" />
-        {errors.postalCode && <p className="text-red-500 text-sm mb-2">{errors.postalCode}</p>}
-        <input type="date" name="deadline" className="block w-full mb-2 p-3 border rounded" />
-        <select name="type" className="block w-full mb-2 p-3 border rounded">
-          <option value="">Wybierz typ</option>
-          <option>Home Extension</option>
-          <option>Winter Garden</option>
-          <option>Patio Roof</option>
-        </select>
-        {errors.type && <p className="text-red-500 text-sm mb-2">{errors.type}</p>}
-        <textarea name="message" placeholder="Wiadomość" className="block w-full mb-2 p-3 border rounded" rows={5}></textarea>
-        <input type="text" name="_honey" className="hidden" tabIndex={-1} autoComplete="off" />
-        <label className="flex items-start gap-2 mb-4">
-          <input type="checkbox" name="consent" />
-          <span>Wyrażam zgodę na kontakt w celu przygotowania oferty.</span>
-        </label>
-        {errors.consent && <p className="text-red-500 text-sm mb-4">{errors.consent}</p>}
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className={`px-8 py-3 text-white font-semibold rounded ${isSubmitting ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'}`}
-        >
-          {isSubmitting ? 'Wysyłanie…' : 'Wyślij zapytanie'}
-        </button>
-      </form>
+    <main className="bg-slate-50 min-h-screen py-12 sm:py-16">
+      <div className="container mx-auto px-4">
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center text-slate-800 tracking-tight">
+          Nowoczesne ogrody zimowe
+        </h1>
+        <p className="mt-4 max-w-2xl mx-auto text-center text-lg text-slate-600">
+          Odkryj nasze realizacje i poproś o bezpłatną wycenę.
+        </p>
+
+        {/* Siatka z 5 kafelkami */}
+        <TileGrid />
+
+        {/* Sekcja z formularzem */}
+        <section id="inquiry-form" className="mt-16 sm:mt-24">
+          <InquiryForm />
+        </section>
+      </div>
     </main>
-  )
+  );
 }
 
 === app/globals.css ===
@@ -239,3 +159,540 @@ export default function Page() {
 @tailwind components;
 @tailwind utilities;
 
+=== components/TileGrid.tsx ===
+// File: components/TileGrid.tsx
+import React from 'react';
+import Image from 'next/image';
+
+// Zaktualizowana definicja danych z precyzyjnymi ścieżkami do obrazów .webp (wersja 'day')
+const tileData = [
+  {
+    title: 'Home Extension',
+    description: 'Nowoczesna bryła z płaskim dachem',
+    imageUrl: '/images/home-extension-day.webp',
+  },
+  {
+    title: 'Klasyczny ciepły',
+    description: 'Szlachetny detal i elegancja',
+    imageUrl: '/images/ogrod-klasyczny-day.webp',
+  },
+  {
+    title: 'Sezonowy zimny',
+    description: 'Idealny na wiosnę i lato',
+    imageUrl: '/images/ogrod-sezonowy-day.webp',
+  },
+  {
+    title: 'Pergola Bioclimatic',
+    description: 'Lamele regulowane',
+    imageUrl: '/images/pergola-bioclimatic-day.webp',
+  },
+  {
+    title: 'Nie wiem',
+    description: 'Potrzebuję porady eksperta',
+    imageUrl: '/images/help-me.webp', 
+  },
+];
+
+const TileGrid = () => {
+  return (
+    <section className="w-full max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
+        Jaki typ konstrukcji Cię interesuje?
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {tileData.map((tile) => (
+          <div
+            key={tile.title}
+            className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 cursor-pointer bg-white group"
+          >
+            <div className="relative w-full h-40">
+              <Image
+                src={tile.imageUrl}
+                alt={tile.title}
+                layout="fill"
+                objectFit="cover"
+                className="transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-1">{tile.title}</h3>
+              <p className="text-sm text-gray-500">{tile.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default TileGrid;
+=== components/FileUpload.tsx ===
+'use client';
+import * as React from 'react';
+
+export type UploadStatus = 'idle' | 'uploading' | 'done' | 'error';
+
+export interface FileData {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  progress: number;
+  status: UploadStatus;
+  url?: string;
+}
+
+type Props = {
+  files?: FileData[];
+  onFilesChange?: (files: FileData[]) => void;
+  onError?: (message: string, type?: 'error' | 'success') => void;
+  accept?: string;
+  maxFiles?: number;
+  maxSizeBytes?: number;
+  className?: string;
+};
+
+const DEFAULT_MAX_FILES = 5;
+const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+function humanSize(n: number) {
+  const u = ['B', 'KB', 'MB', 'GB'];
+  let i = 0, s = n;
+  while (s >= 1024 && i < u.length - 1) { s /= 1024; i++; }
+  const num = s < 10 ? s.toFixed(1) : Math.round(s).toString();
+  return `${num} ${u[i]}`;
+}
+
+function useControlled<T>(ext: T | undefined, initial: T, onChange?: (v: T) => void) {
+  const [local, setLocal] = React.useState<T>(ext ?? initial);
+  React.useEffect(() => { if (typeof ext !== 'undefined') setLocal(ext); }, [ext]);
+  const set = React.useCallback(
+    (v: T | ((prev: T) => T)) => {
+      const nextValue = typeof v === 'function' ? (v as (prev: T) => T)(local) : v;
+      if (typeof ext === 'undefined') setLocal(nextValue);
+      onChange?.(nextValue);
+    }, [ext, onChange, local]
+  );
+  return [local, set] as const;
+}
+
+export default function FileUpload({
+  files: extFiles, onFilesChange, onError,
+  accept = 'image/*,application/pdf',
+  maxFiles = DEFAULT_MAX_FILES,
+  maxSizeBytes = DEFAULT_MAX_SIZE,
+  className,
+}: Props) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useControlled<FileData[]>(extFiles, [], onFilesChange);
+
+  const addFiles = (list: FileList | File[]) => {
+    const arr = Array.from(list);
+    if (files.length + arr.length > maxFiles) {
+      onError?.(`Maksymalnie ${maxFiles} plików`);
+      return;
+    }
+    const tooBig = arr.find(f => f.size > maxSizeBytes);
+    if (tooBig) {
+      onError?.(`Plik za duży: ${tooBig.name} (${humanSize(tooBig.size)})`);
+      return;
+    }
+    const newItems: FileData[] = arr.map(f => ({
+      id: crypto.randomUUID(),
+      file: f, name: f.name, size: f.size, progress: 0, status: 'uploading',
+    }));
+    setFiles(prev => [...prev, ...newItems]);
+
+    newItems.forEach(item => {
+      let ticks = 0;
+      const iv = setInterval(() => {
+        ticks++;
+        setFiles(prev => prev.map(f => f.id === item.id ? {
+          ...f,
+          progress: Math.min(100, f.progress + 10),
+          status: f.progress + 10 >= 100 ? 'done' : 'uploading',
+        } : f));
+        if (ticks >= 10) clearInterval(iv);
+      }, 100);
+    });
+  };
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.currentTarget.files) addFiles(e.currentTarget.files);
+    e.currentTarget.value = '';
+  };
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); addFiles(e.dataTransfer.files); };
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); };
+
+  return (
+    <div className={className ?? 'w-full'}>
+      <input ref={inputRef} type="file" accept={accept} multiple hidden onChange={onInputChange} />
+      <div
+        onDrop={onDrop} onDragOver={onDragOver} onClick={() => inputRef.current?.click()}
+        className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-4 text-center hover:bg-gray-50"
+      >
+        <p className="text-sm">Kliknij, aby wybrać pliki lub upuść je tutaj</p>
+        <p className="mt-1 text-xs text-gray-500">Do {maxFiles} plików, max {humanSize(maxSizeBytes)} każdy</p>
+      </div>
+      {files.length > 0 && (
+        <ul className="mt-3 space-y-2">
+          {files.map(f => (
+            <li key={f.id} className="rounded-md border border-gray-200 p-2">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{f.name}</div>
+                  <div className="text-xs text-gray-500">{humanSize(f.size)}</div>
+                </div>
+                <div className="ml-3 w-40">
+                  <div className="h-2 w-full overflow-hidden rounded bg-gray-200">
+                    <div className="h-2 bg-gray-600 transition-all" style={{ width: `${f.progress}%` }} />
+                  </div>
+                  <div className="mt-1 text-right text-[11px] text-gray-500">{f.progress}%</div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+=== components/Calendar.tsx ===
+'use client';
+import * as React from 'react';
+
+type LegacyProps = {
+  isOpen?: boolean;
+  selectedDate?: Date | null;
+  onDateSelect?: (date: Date | null) => void;
+  onClose?: () => void;
+  currentMonth?: number;
+  currentYear?: number;
+  onMonthChange?: (_direction: 'prev' | 'next') => void;
+};
+
+type NewProps = {
+  value?: Date | null;
+  onChange?: (d: Date | null) => void;
+  min?: string;
+  max?: string;
+  name?: string;
+  required?: boolean;
+  className?: string;
+};
+type Props = LegacyProps & NewProps;
+
+function toInputValue(d?: Date | null) {
+  if (!d) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function fromInputValue(v: string): Date | null {
+  if (!v) return null;
+  const [y, m, d] = v.split('-').map(Number);
+  const dt = new Date(y, (m ?? 1) - 1, d ?? 1);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+export default function Calendar(props: Props) {
+  const { selectedDate, onDateSelect, value, onChange, min, max, name, required, className } = props;
+  const controlled = typeof value !== 'undefined' || typeof selectedDate !== 'undefined';
+  const [local, setLocal] = React.useState<Date | null>(value ?? selectedDate ?? null);
+  
+  React.useEffect(() => {
+    if (typeof value !== 'undefined') setLocal(value ?? null);
+    else if (typeof selectedDate !== 'undefined') setLocal(selectedDate ?? null);
+  }, [value, selectedDate]);
+  
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = fromInputValue(e.target.value);
+    if (!controlled) setLocal(picked);
+    onChange?.(picked);
+    onDateSelect?.(picked);
+  };
+  
+  return (
+    <input
+      type="date"
+      value={toInputValue(local)}
+      onChange={onPick}
+      min={min}
+      max={max}
+      name={name}
+      required={required}
+      className={className ?? 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm'}
+    />
+  );
+}
+
+=== components/InquiryForm.tsx ===
+'use client'
+import React, { useState, useEffect } from 'react'
+import Calendar from './Calendar'
+import FileUpload, { type FileData } from './FileUpload'
+import { validateEmail, validatePhone, validatePostalCode, formatPhone, formatPostalCode } from '../lib/validation'
+
+interface ValidationErrors {
+  email?: string;
+  phone?: string;
+  postalCode?: string;
+}
+
+export default function InquiryForm() {
+  const [selectedType, setSelectedType] = useState<string>('')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [files, setFiles] = useState<FileData[]>([])
+  const [formProgress, setFormProgress] = useState(0)
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+  const [comment, setComment] = useState('')
+  const [consent, setConsent] = useState(false)
+
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+
+  const validateField = (field: 'email' | 'phone' | 'postalCode', value: string) => {
+    const newErrors = { ...errors }
+    let validationResult;
+    if (field === 'email') validationResult = validateEmail(value);
+    if (field === 'phone') validationResult = validatePhone(value);
+    if (field === 'postalCode') validationResult = validatePostalCode(value);
+    
+    if (validationResult && !validationResult.isValid && touched[field]) {
+      newErrors[field] = validationResult.error;
+    } else {
+      delete newErrors[field];
+    }
+    setErrors(newErrors);
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => { const v = e.target.value; setEmail(v); validateField('email', v) }
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => { const v = formatPhone(e.target.value); setPhone(v); validateField('phone', v) }
+  const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = formatPostalCode(e.target.value);
+    if (v.length <= 6) { setPostalCode(v); validateField('postalCode', v) }
+  }
+  const handleBlur = (field: 'email' | 'phone' | 'postalCode') => { 
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const value = field === 'email' ? email : field === 'phone' ? phone : postalCode;
+    validateField(field, value);
+  }
+
+  useEffect(() => {
+    let progress = 0;
+    const fields = [name, email, phone, consent, selectedType];
+    const total = fields.length;
+    fields.forEach(field => { if (field) progress++; });
+    setFormProgress(Math.round((progress / total) * 100));
+  }, [name, email, phone, consent, selectedType]);
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Re-validate all required fields on submit
+    const finalErrors: ValidationErrors = {};
+    if (!validateEmail(email).isValid) finalErrors.email = validateEmail(email).error;
+    if (!validatePhone(phone).isValid) finalErrors.phone = validatePhone(phone).error;
+    if (!validatePostalCode(postalCode).isValid) finalErrors.postalCode = validatePostalCode(postalCode).error;
+    setErrors(finalErrors);
+    setTouched({ email: true, phone: true, postalCode: true });
+
+    if (Object.keys(finalErrors).length === 0 && consent) {
+      console.log('Form submitted:', { name, email, phone, postalCode, selectedType, selectedDate, comment, files, consent });
+      alert('Dziękujemy! Skontaktujemy się wkrótce.');
+    } else {
+      alert('Proszę poprawić błędy w formularzu i wyrazić zgodę.');
+    }
+  }
+
+  const gardenTypes = [
+    { id: 'home-extension', name: 'Home Extension', desc: 'Rozszerzenie przestrzeni' },
+    { id: 'classic-warm', name: 'Ogród klasyczny', desc: 'Całoroczny, ogrzewany' },
+    { id: 'seasonal-cold', name: 'Ogród sezonowy', desc: 'Użytkowany w ciepłych miesiącach' },
+    { id: 'pergola', name: 'Pergola', desc: 'Otwarta konstrukcja' },
+    { id: 'not-sure', name: 'Nie wiem', desc: 'Pomoc w wyborze' }
+  ];
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 relative bg-white rounded-2xl shadow-2xl border border-slate-200">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Zapytanie o wycenę</h2>
+        <p className="text-center text-slate-500">Wypełnij formularz, a my przygotujemy dla Ciebie ofertę.</p>
+        <div className="flex justify-between items-center mt-6 mb-2">
+            <span className="text-sm font-medium text-gray-700">Postęp</span>
+            <span className="text-sm font-medium text-blue-600">{formProgress}%</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${formProgress}%` }} />
+        </div>
+      </div>
+
+      <div className="space-y-8">
+        <div>
+          <label className="block text-lg font-semibold text-gray-800 mb-4">1. Wybierz typ konstrukcji *</label>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            {gardenTypes.map(type => (
+              <button key={type.id} type="button" onClick={() => setSelectedType(type.id)}
+                className={`w-full p-3 text-center rounded-lg border-2 transition-all ${selectedType === type.id ? 'border-blue-600 bg-blue-50 ring-2 ring-blue-500' : 'border-gray-200 hover:border-gray-400'}`}>
+                <div className="font-semibold text-sm">{type.name}</div>
+                <div className="text-xs text-gray-500">{type.desc}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">2. Dane kontaktowe</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                  <label className="block text-sm font-medium text-gray-700">Imię i nazwisko *</label>
+                  <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              </div>
+              <div>
+                  <label className="block text-sm font-medium text-gray-700">E-mail *</label>
+                  <input type="email" value={email} onChange={handleEmailChange} onBlur={() => handleBlur('email')} className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} required />
+                  {errors.email && (<p className="mt-1 text-sm text-red-600">{errors.email}</p>)}
+              </div>
+               <div>
+                  <label className="block text-sm font-medium text-gray-700">Telefon *</label>
+                  <input type="tel" value={phone} onChange={handlePhoneChange} onBlur={() => handleBlur('phone')} placeholder="123 456 789" className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.phone ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} required />
+                  {errors.phone && (<p className="mt-1 text-sm text-red-600">{errors.phone}</p>)}
+              </div>
+               <div>
+                  <label className="block text-sm font-medium text-gray-700">Kod pocztowy (opcjonalnie)</label>
+                  <input type="text" value={postalCode} onChange={handlePostalCodeChange} onBlur={() => handleBlur('postalCode')} placeholder="00-000" className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.postalCode ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} />
+                  {errors.postalCode && (<p className="mt-1 text-xs text-red-600">{errors.postalCode}</p>)}
+              </div>
+            </div>
+        </div>
+        
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">3. Dodatkowe informacje (opcjonalnie)</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Preferowany termin kontaktu</label>
+                  <Calendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+              </div>
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Dodaj zdjęcia lub dokumenty</label>
+                  <FileUpload files={files} onFilesChange={setFiles} onError={(m) => alert(m)} />
+              </div>
+              <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Wiadomość</label>
+                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Opisz swoje oczekiwania..."></textarea>
+              </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-8 border-t pt-6">
+         <div className="flex items-start">
+            <div className="flex h-6 items-center">
+                <input id="consent" name="consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"/>
+            </div>
+            <div className="ml-3 text-sm leading-6">
+                <label htmlFor="consent" className="font-medium text-gray-900">Wyrażam zgodę na kontakt w celu przygotowania oferty *</label>
+            </div>
+         </div>
+      </div>
+
+      <div className="mt-8 text-center">
+          <button type="submit" className="px-10 py-4 rounded-lg font-semibold text-white transition-all bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none" disabled={!consent}>
+              Wyślij zapytanie
+          </button>
+      </div>
+    </form>
+  )
+}
+
+=== components/InquiryForm.hooks.ts ===
+// File: components/InquiryForm.hooks.ts
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+// KOREKTA: Zmieniono 'leadSchema' na 'inquirySchema'
+import { inquirySchema, type LeadDTO } from '../lib/schemas';
+
+export const useInquiryForm = () => useForm<LeadDTO>({
+  // KOREKTA: Zmieniono 'leadSchema' na 'inquirySchema'
+  resolver: zodResolver(inquirySchema),
+  defaultValues: {
+    name: '',
+    phone: '',
+    email: '',
+    postalCode: '',
+    message: '',
+    company: '',
+    consent: false,
+  },
+});
+=== lib/validation.ts ===
+export const validateEmail = (email: string): { isValid: boolean; error?: string } => {
+  if (!email) return { isValid: false, error: 'Email jest wymagany' }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return { isValid: false, error: 'Nieprawidłowy format email' }
+  }
+  return { isValid: true }
+}
+
+export const validatePhone = (phone: string): { isValid: boolean; error?: string } => {
+  if (!phone) return { isValid: false, error: 'Telefon jest wymagany' }
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+  const phoneRegex = /^(?:\+48)?(?:\d{9})$/
+  if (!phoneRegex.test(cleanPhone)) {
+    return { isValid: false, error: 'Podaj 9 cyfr (np. 123456789 lub +48123456789)' }
+  }
+  return { isValid: true }
+}
+
+export const validatePostalCode = (code: string): { isValid: boolean; error?: string } => {
+  if (!code || code.length < 6) return { isValid: true } // Opcjonalne pole, waliduj tylko jeśli jest w pełni wpisane
+  const postalRegex = /^\d{2}-\d{3}$/
+  if (!postalRegex.test(code)) {
+    return { isValid: false, error: 'Format: XX-XXX (np. 00-950)' }
+  }
+  return { isValid: true }
+}
+
+export const formatPhone = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '')
+  if (cleaned.length <= 3) return cleaned
+  if (cleaned.length <= 6) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`
+  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)}`
+}
+
+export const formatPostalCode = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '')
+  if (cleaned.length <= 2) return cleaned
+  return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}`
+}
+
+=== lib/schemas.ts ===
+// File: lib/schemas.ts
+import { z } from 'zod';
+
+export const inquirySchema = z.object({
+  name: z.string().min(2, { message: 'Imię musi mieć co najmniej 2 znaki.' }),
+  phone: z.string().min(9, { message: 'Numer telefonu musi mieć co najmniej 9 cyfr.' }),
+  email: z.string().email({ message: 'Proszę podać poprawny adres e-mail.' }),
+  postalCode: z.string().regex(/^\d{2}-\d{3}$/, { message: 'Kod pocztowy musi być w formacie XX-XXX.' }),
+  message: z.string().min(10, { message: 'Wiadomość musi mieć co najmniej 10 znaków.' }).max(500),
+  company: z.string().optional(),
+  type: z.enum(['home_extension', 'conservatory', 'pergola', 'carport', 'other'], {
+    // KOREKTA: Zastosowano prawidłową składnię z jednym kluczem 'message' dla błędu walidacji.
+    message: 'Proszę wybrać prawidłowy typ konstrukcji.',
+  }),
+  consent: z.boolean().refine(val => val === true, {
+    message: 'Zgoda na przetwarzanie danych jest wymagana.',
+  }),
+  preferredDate: z.string().optional(),
+});
+
+// Typ LeadDTO wyeksportowany poza obiektem schematu.
+export type LeadDTO = z.infer<typeof inquirySchema>;
