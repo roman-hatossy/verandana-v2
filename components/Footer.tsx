@@ -6,13 +6,15 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 mt-20">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Logo WebP */}
-        <div className="flex justify-center mb-6">
-          <img 
-            src="/images/verandana_logo_losos.webp" 
-            alt="Verandana"
-            style={{ height: '60px', width: 'auto' }}
-          />
+        
+        {/* Logo jako stylizowany tekst - ZAWSZE DZIAŁA */}
+        <div className="text-center mb-6">
+          <h2 className="text-4xl font-bold tracking-wider">
+            <span className="text-orange-400">VERANDANA</span>
+          </h2>
+          <p className="text-xs text-gray-500 uppercase tracking-widest mt-1">
+            Ogrody Zimowe
+          </p>
         </div>
         
         {/* Dane firmy */}
