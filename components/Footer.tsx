@@ -6,10 +6,13 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12 mt-20">
       <div className="max-w-6xl mx-auto px-6">
-        {/* Logo tekstowe jako fallback */}
-        <div className="text-center mb-6">
-          <div className="text-3xl font-bold text-orange-400">VERANDANA</div>
-          <div className="text-xs text-gray-400 tracking-widest">OGRODY ZIMOWE</div>
+        {/* Próba z logo */}
+        <div className="flex justify-center mb-6">
+          <img 
+            src="/logo.svg" 
+            alt="Verandana"
+            style={{ height: '60px', width: 'auto' }}
+          />
         </div>
         
         {/* Dane firmy */}

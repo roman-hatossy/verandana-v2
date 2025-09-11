@@ -1,0 +1,903 @@
+=== app/regulamin/page.tsx ===
+export default function TermsPage() {
+  return (
+    <div className="bg-white min-h-screen">
+      <div className="max-w-4xl mx-auto py-12 px-6">
+        <h1 className="text-3xl font-bold mb-6">Regulamin świadczenia usług</h1>
+        <div className="prose lg:prose-xl space-y-4">
+          <h2 className="text-xl font-semibold mt-6">§1. Postanowienia ogólne</h2>
+          <p>
+            1. Niniejszy regulamin określa zasady korzystania ze strony internetowej verandana.pl 
+            oraz zasady świadczenia usług przez VERANDANA sp. z o.o.<br />
+            2. Właścicielem strony jest VERANDANA sp. z o.o. z siedzibą w Gliwicach.
+          </p>
+          <h2 className="text-xl font-semibold mt-6">§2. Zakres usług</h2>
+          <p>
+            Usługodawca świadczy usługi w zakresie:<br />
+            • Projektowania ogrodów zimowych<br />
+            • Montażu konstrukcji ogrodowych<br />
+            • Doradztwa technicznego<br />
+            • Serwisu gwarancyjnego i pogwarancyjnego
+          </p>
+          <h2 className="text-xl font-semibold mt-6">§3. Gwarancja</h2>
+          <p>
+            • Konstrukcja aluminiowa: 10 lat<br />
+            • Szyby i uszczelki: 5 lat<br />
+            • Elementy ruchome: 2 lata<br />
+            • Montaż: 3 lata
+          </p>
+          <h2 className="text-xl font-semibold mt-6">§4. Reklamacje</h2>
+          <p>
+            1. Reklamacje należy zgłaszać pisemnie lub mailowo<br />
+            2. Czas rozpatrzenia: do 14 dni<br />
+            3. W przypadku uznania reklamacji - naprawa w ciągu 30 dni
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+=== app/_components/TileGrid.tsx ===
+const tiles = [
+  { title: "Home Extension", desc: "Rozszerzenie przestrzeni", icon: "🏠" },
+  { title: "Ogród klasyczny", desc: "Całoroczny ogród", icon: "☀️" },
+  { title: "Ogród sezonowy", desc: "Na ciepłe miesiące", icon: "❄️" },
+  { title: "Pergola", desc: "Konstrukcja ogrodowa", icon: "🌿" },
+  { title: "Pomoc w wyborze", desc: "Doradzimy najlepsze", icon: "❓" }
+];
+
+export default function TileGrid() {
+  return (
+    <section className="py-16 px-4">
+      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tiles.map((tile, i) => (
+          <div key={i} className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+            <div className="text-4xl mb-3">{tile.icon}</div>
+            <h3 className="text-xl font-bold mb-2">{tile.title}</h3>
+            <p className="text-gray-600">{tile.desc}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+=== app/_components/HeroSection.tsx ===
+export default function HeroSection() {
+  return (
+    <div className="relative h-96 bg-gradient-to-r from-orange-400 to-orange-600 flex items-center justify-center">
+      <div className="text-center text-white">
+        <h1 className="text-5xl md:text-7xl font-bold mb-4">VERANDANA</h1>
+        <p className="text-xl md:text-2xl">Nowoczesne ogrody zimowe</p>
+      </div>
+    </div>
+  );
+}
+
+=== app/layout.tsx ===
+import './globals.css'
+import type { Metadata } from 'next'
+import { Toaster } from 'sonner' // GENESIS H0: Toaster dla powiadomień
+
+export const metadata: Metadata = {
+  title: 'Verandana',
+  description: 'Zapytanie ofertowe Verandana'
+}
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pl">
+      <body>
+        {children}
+        <Toaster richColors closeButton position="top-center" /> {/* GENESIS H0: aktywacja toasta */}
+      </body>
+    </html>
+  )
+}
+
+=== app/polityka-prywatnosci/page.tsx ===
+export default function PrivacyPolicyPage() {
+  return (
+    <div className="bg-white min-h-screen">
+      <div className="max-w-4xl mx-auto py-12 px-6">
+        <h1 className="text-3xl font-bold mb-6">Polityka Prywatności</h1>
+        <div className="prose lg:prose-xl space-y-4">
+          <h2 className="text-xl font-semibold mt-6">1. Administrator danych</h2>
+          <p>
+            Administratorem Twoich danych osobowych jest VERANDANA sp. z o.o. z siedzibą w Gliwicach (44-151) 
+            przy ul. Miodunki 3, NIP: 6312707409, REGON: 524383183.
+          </p>
+          <h2 className="text-xl font-semibold mt-6">2. Dane kontaktowe</h2>
+          <p>
+            W sprawach związanych z przetwarzaniem danych osobowych można kontaktować się:<br />
+            • Email: roman@verandana.pl<br />
+            • Telefon: +48 605 834 422<br />
+            • Adres: Miodunki 3, 44-151 Gliwice
+          </p>
+          <h2 className="text-xl font-semibold mt-6">3. Cele przetwarzania danych</h2>
+          <p>
+            Przetwarzamy Twoje dane osobowe w następujących celach:<br />
+            • Odpowiedź na zapytanie ofertowe (podstawa: art. 6 ust. 1 lit. b RODO)<br />
+            • Przygotowanie i przedstawienie oferty handlowej<br />
+            • Kontakt telefoniczny lub mailowy w sprawie złożonego zapytania<br />
+            • Cele marketingowe - za Twoją zgodą (art. 6 ust. 1 lit. a RODO)
+          </p>
+          <h2 className="text-xl font-semibold mt-6">4. Twoje prawa</h2>
+          <p>
+            Masz prawo do:<br />
+            • Dostępu do swoich danych osobowych<br />
+            • Sprostowania nieprawidłowych danych<br />
+            • Usunięcia danych ("prawo do bycia zapomnianym")<br />
+            • Ograniczenia przetwarzania<br />
+            • Przenoszenia danych<br />
+            • Sprzeciwu wobec przetwarzania<br />
+            • Wycofania zgody w dowolnym momencie<br />
+            • Wniesienia skargi do Prezesa UODO
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+=== app/api/send-lead/route.ts ===
+import { NextResponse, NextRequest } from 'next/server';
+import { Resend } from 'resend';
+
+// Inicjalizacja Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function POST(req: NextRequest) {
+  try {
+    // Parsowanie danych
+    const data = await req.json();
+    
+    // Walidacja
+    if (!data.name || !data.email || !data.phone || !data.consent) {
+      return NextResponse.json(
+        { error: 'Brak wszystkich wymaganych pól.' },
+        { status: 400 }
+      );
+    }
+    
+    // Wysyłanie emaila przez Resend
+    const emailResult = await resend.emails.send({
+      from: 'Verandana <formularz@verandana.pl>', // ZMIEŃ NA SWOJĄ DOMENĘ!
+      to: ['roman@verandana.pl'], // ZMIEŃ NA SWÓJ EMAIL!
+      replyTo: data.email, // POPRAWIONE!
+      subject: `Nowy Lead: ${data.name}`,
+      html: `
+        <h2>Nowy lead z formularza</h2>
+        <p><strong>Imię:</strong> ${data.name}</p>
+        <p><strong>Email:</strong> ${data.email}</p>
+        <p><strong>Telefon:</strong> ${data.phone}</p>
+        <p><strong>Typ:</strong> ${data.type || 'Nie wybrano'}</p>
+        <p><strong>Kod pocztowy:</strong> ${data.postalCode || 'Brak'}</p>
+        <p><strong>Wiadomość:</strong> ${data.message || 'Brak'}</p>
+      `,
+    });
+    
+    if (emailResult.error) {
+      console.error("RESEND ERROR:", emailResult.error);
+      throw new Error(emailResult.error.message);
+    }
+    
+    return NextResponse.json({ 
+      message: 'Wiadomość wysłana pomyślnie.' 
+    });
+    
+  } catch (error) {
+    console.error("API ERROR:", error);
+    return NextResponse.json(
+      { error: 'Wystąpił błąd podczas wysyłania.' },
+      { status: 500 }
+    );
+  }
+}
+=== app/page.tsx ===
+'use client';
+import React, { useState } from 'react';
+import InquiryForm from '../components/InquiryForm';
+import Footer from '../components/Footer';
+
+const gardenTypes = [
+  { 
+    id: 'home-extension', 
+    name: 'Home Extension', 
+    desc: 'Nowoczesna bryła z płaskim dachem',
+    image: '/images/home-extension-day.webp'
+  },
+  { 
+    id: 'classic-warm', 
+    name: 'Klasyczny ciepły', 
+    desc: 'Szlachetny detal i elegancja',
+    image: '/images/ogrod-klasyczny-day.webp'
+  },
+  { 
+    id: 'seasonal-cold', 
+    name: 'Sezonowy zimny', 
+    desc: 'Idealny na wiosnę i lato',
+    image: '/images/ogrod-sezonowy-day.webp'
+  },
+  { 
+    id: 'pergola', 
+    name: 'Pergola Bioclimatic', 
+    desc: 'Lamele regulowane',
+    image: '/images/pergola-bioclimatic-day.webp'
+  },
+  { 
+    id: 'not-sure', 
+    name: 'Nie wiem', 
+    desc: 'Potrzebuję porady eksperta',
+    image: '/images/help-me.webp'
+  }
+];
+
+export default function HomePage() {
+  const [selectedType, setSelectedType] = useState('');
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <header className="py-8 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 text-center mb-4">
+            Wprowadź do domu harmonię i nową przestrzeń do życia.
+          </h1>
+          <p className="text-lg text-slate-600 text-center max-w-3xl mx-auto mb-12">
+            Odkryj, jak ogród zimowy otwarty na naturę staje się sercem Twojego domu przez cały rok.
+          </p>
+          
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Jaki typ konstrukcji Cię interesuje?
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-6xl mx-auto">
+              {gardenTypes.map(type => (
+                <button 
+                  key={type.id} 
+                  type="button" 
+                  onClick={() => setSelectedType(type.id)}
+                  className={`relative overflow-hidden rounded-lg transition-all transform hover:scale-105 ${
+                    selectedType === type.id 
+                      ? 'ring-4 ring-blue-500 shadow-xl' 
+                      : 'shadow-lg hover:shadow-xl'
+                  }`}
+                >
+                  <div className="aspect-w-4 aspect-h-3 bg-gray-200">
+                    <img 
+                      src={type.image} 
+                      alt={type.name}
+                      className="w-full h-40 object-cover"
+                    />
+                  </div>
+                  <div className="p-3 bg-white">
+                    <h3 className="font-semibold text-sm text-gray-900">{type.name}</h3>
+                    <p className="text-xs text-gray-600 mt-1">{type.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <main className="max-w-6xl mx-auto p-6">
+        <InquiryForm preselectedType={selectedType} />
+      </main>
+      
+      <Footer />
+    </div>
+  );
+}
+
+=== app/globals.css ===
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+=== components/TileGrid.tsx ===
+// File: components/TileGrid.tsx
+import React from 'react';
+import Image from 'next/image';
+
+// Zaktualizowana definicja danych z precyzyjnymi ścieżkami do obrazów .webp (wersja 'day')
+const tileData = [
+  {
+    title: 'Home Extension',
+    description: 'Nowoczesna bryła z płaskim dachem',
+    imageUrl: '/images/home-extension-day.webp',
+  },
+  {
+    title: 'Klasyczny ciepły',
+    description: 'Szlachetny detal i elegancja',
+    imageUrl: '/images/ogrod-klasyczny-day.webp',
+  },
+  {
+    title: 'Sezonowy zimny',
+    description: 'Idealny na wiosnę i lato',
+    imageUrl: '/images/ogrod-sezonowy-day.webp',
+  },
+  {
+    title: 'Pergola Bioclimatic',
+    description: 'Lamele regulowane',
+    imageUrl: '/images/pergola-bioclimatic-day.webp',
+  },
+  {
+    title: 'Nie wiem',
+    description: 'Potrzebuję porady eksperta',
+    imageUrl: '/images/help-me.webp', 
+  },
+];
+
+const TileGrid = () => {
+  return (
+    <section className="w-full max-w-6xl mx-auto px-4 py-12 md:py-16">
+      <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
+        Jaki typ konstrukcji Cię interesuje?
+      </h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        {tileData.map((tile) => (
+          <div
+            key={tile.title}
+            className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-300 ease-in-out hover:shadow-xl hover:-translate-y-1 cursor-pointer bg-white group"
+          >
+            <div className="relative w-full h-40">
+              <Image
+                src={tile.imageUrl}
+                alt={tile.title}
+                layout="fill"
+                objectFit="cover"
+                className="transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-1">{tile.title}</h3>
+              <p className="text-sm text-gray-500">{tile.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default TileGrid;
+=== components/Footer.tsx ===
+import Link from 'next/link';
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <footer className="bg-gray-900 text-white py-12 mt-20">
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Logo tekstowe jako fallback */}
+        <div className="text-center mb-6">
+          <div className="text-3xl font-bold text-orange-400">VERANDANA</div>
+          <div className="text-xs text-gray-400 tracking-widest">OGRODY ZIMOWE</div>
+        </div>
+        
+        {/* Dane firmy */}
+        <div className="text-center mb-6">
+          <p className="font-bold text-lg">VERANDANA sp. z o.o.</p>
+          <p className="text-sm text-gray-400">Miodunki 3, 44-151 Gliwice</p>
+          <p className="text-sm text-gray-400">NIP: 6312707409 | REGON: 524383183</p>
+        </div>
+        
+        {/* Dane kontaktowe */}
+        <div className="text-center mb-6">
+          <a href="tel:+48605834422" className="text-white hover:text-orange-400 transition-colors">
+            Tel: +48 605 834 422
+          </a>
+          <span className="mx-2 text-gray-500">|</span>
+          <a href="mailto:roman@verandana.pl" className="text-white hover:text-orange-400 transition-colors">
+            roman@verandana.pl
+          </a>
+        </div>
+        
+        {/* Linki prawne */}
+        <div className="border-t border-gray-700 pt-6 mt-6 flex justify-center gap-6 text-sm">
+          <Link href="/polityka-prywatnosci" className="text-gray-300 hover:text-white transition-colors">
+            Polityka Prywatności
+          </Link>
+          <Link href="/regulamin" className="text-gray-300 hover:text-white transition-colors">
+            Regulamin
+          </Link>
+        </div>
+        
+        {/* Copyright */}
+        <p className="text-xs text-gray-500 text-center mt-6">
+          &copy; {currentYear} VERANDANA sp. z o.o. Wszelkie prawa zastrzeżone.
+        </p>
+      </div>
+    </footer>
+  );
+}
+
+=== components/FileUpload.tsx ===
+'use client';
+import * as React from 'react';
+
+export type UploadStatus = 'idle' | 'uploading' | 'done' | 'error';
+
+export interface FileData {
+  id: string;
+  file: File;
+  name: string;
+  size: number;
+  progress: number;
+  status: UploadStatus;
+  url?: string;
+}
+
+type Props = {
+  files?: FileData[];
+  onFilesChange?: (files: FileData[]) => void;
+  onError?: (message: string, type?: 'error' | 'success') => void;
+  accept?: string;
+  maxFiles?: number;
+  maxSizeBytes?: number;
+  className?: string;
+};
+
+const DEFAULT_MAX_FILES = 5;
+const DEFAULT_MAX_SIZE = 10 * 1024 * 1024; // 10MB
+
+function humanSize(n: number) {
+  const u = ['B', 'KB', 'MB', 'GB'];
+  let i = 0, s = n;
+  while (s >= 1024 && i < u.length - 1) { s /= 1024; i++; }
+  const num = s < 10 ? s.toFixed(1) : Math.round(s).toString();
+  return `${num} ${u[i]}`;
+}
+
+function useControlled<T>(ext: T | undefined, initial: T, onChange?: (v: T) => void) {
+  const [local, setLocal] = React.useState<T>(ext ?? initial);
+  React.useEffect(() => { if (typeof ext !== 'undefined') setLocal(ext); }, [ext]);
+  const set = React.useCallback(
+    (v: T | ((prev: T) => T)) => {
+      const nextValue = typeof v === 'function' ? (v as (prev: T) => T)(local) : v;
+      if (typeof ext === 'undefined') setLocal(nextValue);
+      onChange?.(nextValue);
+    }, [ext, onChange, local]
+  );
+  return [local, set] as const;
+}
+
+export default function FileUpload({
+  files: extFiles, onFilesChange, onError,
+  accept = 'image/*,application/pdf',
+  maxFiles = DEFAULT_MAX_FILES,
+  maxSizeBytes = DEFAULT_MAX_SIZE,
+  className,
+}: Props) {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [files, setFiles] = useControlled<FileData[]>(extFiles, [], onFilesChange);
+
+  const addFiles = (list: FileList | File[]) => {
+    const arr = Array.from(list);
+    if (files.length + arr.length > maxFiles) {
+      onError?.(`Maksymalnie ${maxFiles} plików`);
+      return;
+    }
+    const tooBig = arr.find(f => f.size > maxSizeBytes);
+    if (tooBig) {
+      onError?.(`Plik za duży: ${tooBig.name} (${humanSize(tooBig.size)})`);
+      return;
+    }
+    const newItems: FileData[] = arr.map(f => ({
+      id: crypto.randomUUID(),
+      file: f, name: f.name, size: f.size, progress: 0, status: 'uploading',
+    }));
+    setFiles(prev => [...prev, ...newItems]);
+
+    newItems.forEach(item => {
+      let ticks = 0;
+      const iv = setInterval(() => {
+        ticks++;
+        setFiles(prev => prev.map(f => f.id === item.id ? {
+          ...f,
+          progress: Math.min(100, f.progress + 10),
+          status: f.progress + 10 >= 100 ? 'done' : 'uploading',
+        } : f));
+        if (ticks >= 10) clearInterval(iv);
+      }, 100);
+    });
+  };
+
+  const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.currentTarget.files) addFiles(e.currentTarget.files);
+    e.currentTarget.value = '';
+  };
+  const onDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); addFiles(e.dataTransfer.files); };
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); };
+
+  return (
+    <div className={className ?? 'w-full'}>
+      <input ref={inputRef} type="file" accept={accept} multiple hidden onChange={onInputChange} />
+      <div
+        onDrop={onDrop} onDragOver={onDragOver} onClick={() => inputRef.current?.click()}
+        className="flex w-full cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-4 text-center hover:bg-gray-50"
+      >
+        <p className="text-sm">Kliknij, aby wybrać pliki lub upuść je tutaj</p>
+        <p className="mt-1 text-xs text-gray-500">Do {maxFiles} plików, max {humanSize(maxSizeBytes)} każdy</p>
+      </div>
+      {files.length > 0 && (
+        <ul className="mt-3 space-y-2">
+          {files.map(f => (
+            <li key={f.id} className="rounded-md border border-gray-200 p-2">
+              <div className="flex items-center justify-between">
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-medium">{f.name}</div>
+                  <div className="text-xs text-gray-500">{humanSize(f.size)}</div>
+                </div>
+                <div className="ml-3 w-40">
+                  <div className="h-2 w-full overflow-hidden rounded bg-gray-200">
+                    <div className="h-2 bg-gray-600 transition-all" style={{ width: `${f.progress}%` }} />
+                  </div>
+                  <div className="mt-1 text-right text-[11px] text-gray-500">{f.progress}%</div>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+=== components/Calendar.tsx ===
+'use client';
+import * as React from 'react';
+
+type LegacyProps = {
+  isOpen?: boolean;
+  selectedDate?: Date | null;
+  onDateSelect?: (date: Date | null) => void;
+  onClose?: () => void;
+  currentMonth?: number;
+  currentYear?: number;
+  onMonthChange?: (_direction: 'prev' | 'next') => void;
+};
+
+type NewProps = {
+  value?: Date | null;
+  onChange?: (d: Date | null) => void;
+  min?: string;
+  max?: string;
+  name?: string;
+  required?: boolean;
+  className?: string;
+};
+type Props = LegacyProps & NewProps;
+
+function toInputValue(d?: Date | null) {
+  if (!d) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function fromInputValue(v: string): Date | null {
+  if (!v) return null;
+  const [y, m, d] = v.split('-').map(Number);
+  const dt = new Date(y, (m ?? 1) - 1, d ?? 1);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+export default function Calendar(props: Props) {
+  const { selectedDate, onDateSelect, value, onChange, min, max, name, required, className } = props;
+  const controlled = typeof value !== 'undefined' || typeof selectedDate !== 'undefined';
+  const [local, setLocal] = React.useState<Date | null>(value ?? selectedDate ?? null);
+  
+  React.useEffect(() => {
+    if (typeof value !== 'undefined') setLocal(value ?? null);
+    else if (typeof selectedDate !== 'undefined') setLocal(selectedDate ?? null);
+  }, [value, selectedDate]);
+  
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = fromInputValue(e.target.value);
+    if (!controlled) setLocal(picked);
+    onChange?.(picked);
+    onDateSelect?.(picked);
+  };
+  
+  return (
+    <input
+      type="date"
+      value={toInputValue(local)}
+      onChange={onPick}
+      min={min}
+      max={max}
+      name={name}
+      required={required}
+      className={className ?? 'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm'}
+    />
+  );
+}
+
+=== components/InquiryForm.tsx ===
+'use client'
+import React, { useState, useEffect } from 'react'
+import Calendar from './Calendar'
+import FileUpload, { type FileData } from './FileUpload'
+import { validateEmail, validatePhone, validatePostalCode, formatPhone, formatPostalCode } from '../lib/validation'
+import { toast } from 'sonner'
+
+interface ValidationErrors {
+  email?: string;
+  phone?: string;
+  postalCode?: string;
+}
+
+interface InquiryFormProps {
+  preselectedType?: string;
+}
+
+export default function InquiryForm({ preselectedType = '' }: InquiryFormProps) {
+  const [selectedType, setSelectedType] = useState<string>(preselectedType)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [files, setFiles] = useState<FileData[]>([])
+  const [formProgress, setFormProgress] = useState(0)
+
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [postalCode, setPostalCode] = useState('')
+  const [comment, setComment] = useState('')
+  const [consent, setConsent] = useState(false)
+
+  const [errors, setErrors] = useState<ValidationErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Aktualizuj selectedType gdy zmieni się prop
+  useEffect(() => {
+    if (preselectedType) {
+      setSelectedType(preselectedType);
+    }
+  }, [preselectedType]);
+
+  const validateField = (field: 'email' | 'phone' | 'postalCode', value: string) => {
+    const newErrors = { ...errors }
+    let validationResult;
+    if (field === 'email') validationResult = validateEmail(value);
+    if (field === 'phone') validationResult = validatePhone(value);
+    if (field === 'postalCode') validationResult = validatePostalCode(value);
+    
+    if (validationResult && !validationResult.isValid && touched[field]) {
+      newErrors[field] = validationResult.error;
+    } else {
+      delete newErrors[field];
+    }
+    setErrors(newErrors);
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => { const v = e.target.value; setEmail(v); validateField('email', v) }
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => { const v = formatPhone(e.target.value); setPhone(v); validateField('phone', v) }
+  const handlePostalCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = formatPostalCode(e.target.value);
+    if (v.length <= 6) { setPostalCode(v); validateField('postalCode', v) }
+  }
+  const handleBlur = (field: 'email' | 'phone' | 'postalCode') => { 
+    setTouched(prev => ({ ...prev, [field]: true }));
+    const value = field === 'email' ? email : field === 'phone' ? phone : postalCode;
+    validateField(field, value);
+  }
+
+  useEffect(() => {
+    let progress = 0;
+    const fields = [name, email, phone, consent, selectedType];
+    const total = fields.length;
+    fields.forEach(field => { if (field) progress++; });
+    setFormProgress(Math.round((progress / total) * 100));
+  }, [name, email, phone, consent, selectedType]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const finalErrors: ValidationErrors = {};
+    if (!validateEmail(email).isValid) finalErrors.email = validateEmail(email).error;
+    if (!validatePhone(phone).isValid) finalErrors.phone = validatePhone(phone).error;
+    if (postalCode && !validatePostalCode(postalCode).isValid) {
+        finalErrors.postalCode = validatePostalCode(postalCode).error;
+    }
+    setErrors(finalErrors);
+    setTouched({ email: true, phone: true, postalCode: true });
+
+    if (Object.keys(finalErrors).length > 0 || !consent) {
+        toast.error('Proszę poprawić błędy w formularzu i wyrazić zgodę.');
+        setIsSubmitting(false);
+        return;
+    }
+
+    const formData = { name, email, phone, postalCode, type: selectedType, date: selectedDate, message: comment, consent };
+
+    try {
+        const response = await fetch('/api/send-lead', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(formData),
+        });
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.message || 'Wystąpił błąd serwera.');
+        }
+        toast.success('Dziękujemy! Twoje zapytanie zostało wysłane.');
+    } catch (error) {
+        console.error("Błąd wysyłania formularza:", error);
+        toast.error((error as Error).message || 'Nie udało się wysłać formularza. Spróbuj ponownie.');
+    } finally {
+        setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 relative bg-white rounded-2xl shadow-2xl border border-slate-200">
+        <div className="mb-8">
+            <h2 className="text-3xl font-bold text-center text-slate-800 mb-2">Zapytanie o wycenę</h2>
+            <p className="text-center text-slate-500">
+              {selectedType ? 'Wypełnij formularz dla wybranego typu ogrodu.' : 'Wybierz typ ogrodu powyżej i wypełnij formularz.'}
+            </p>
+            <div className="flex justify-between items-center mt-6 mb-2">
+                <span className="text-sm font-medium text-gray-700">Postęp</span>
+                <span className="text-sm font-medium text-blue-600">{formProgress}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div className="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style={{ width: `${formProgress}%` }} />
+            </div>
+        </div>
+
+        <div className="space-y-8">
+            <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dane kontaktowe</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Imię i nazwisko *</label>
+                    <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">E-mail *</label>
+                    <input type="email" value={email} onChange={handleEmailChange} onBlur={() => handleBlur('email')} className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} required />
+                    {errors.email && (<p className="mt-1 text-sm text-red-600">{errors.email}</p>)}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Telefon *</label>
+                    <input type="tel" value={phone} onChange={handlePhoneChange} onBlur={() => handleBlur('phone')} placeholder="123 456 789" className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.phone ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} required />
+                    {errors.phone && (<p className="mt-1 text-sm text-red-600">{errors.phone}</p>)}
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Kod pocztowy (opcjonalnie)</label>
+                    <input type="text" value={postalCode} onChange={handlePostalCodeChange} onBlur={() => handleBlur('postalCode')} placeholder="00-000" className={`mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${errors.postalCode ? 'border-red-500 ring-red-500' : 'border-gray-300 focus:ring-blue-500'}`} />
+                    {errors.postalCode && (<p className="mt-1 text-xs text-red-600">{errors.postalCode}</p>)}
+                </div>
+            </div>
+            </div>
+            
+            <div>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Dodatkowe informacje (opcjonalnie)</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Planowany termin montażu</label>
+                    <Calendar selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Dodaj zdjęcia lub dokumenty</label>
+                    <FileUpload files={files} onFilesChange={setFiles} onError={(m) => toast.error(m)} />
+                </div>
+                <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700">Wiadomość</label>
+                    <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={4} className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Opisz swoje oczekiwania..."></textarea>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div className="mt-8 border-t pt-6">
+            <div className="flex items-start">
+            <div className="flex h-6 items-center">
+                <input id="consent" name="consent" type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-600"/>
+            </div>
+            <div className="ml-3 text-sm leading-6">
+                <label htmlFor="consent" className="font-medium text-gray-900">Wyrażam zgodę na kontakt w celu przygotowania oferty *</label>
+            </div>
+            </div>
+        </div>
+
+        <div className="mt-8 text-center">
+            <button type="submit" className="px-10 py-4 rounded-lg font-semibold text-white transition-all bg-blue-600 hover:bg-blue-700 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none" disabled={!consent || isSubmitting}>
+                {isSubmitting ? 'Wysyłanie...' : 'Wyślij zapytanie'}
+            </button>
+        </div>
+    </form>
+  )
+}
+
+=== components/InquiryForm.hooks.ts ===
+// File: components/InquiryForm.hooks.ts
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+// KOREKTA: Zmieniono 'leadSchema' na 'inquirySchema'
+import { inquirySchema, type LeadDTO } from '../lib/schemas';
+
+export const useInquiryForm = () => useForm<LeadDTO>({
+  // KOREKTA: Zmieniono 'leadSchema' na 'inquirySchema'
+  resolver: zodResolver(inquirySchema),
+  defaultValues: {
+    name: '',
+    phone: '',
+    email: '',
+    postalCode: '',
+    message: '',
+    company: '',
+    consent: false,
+  },
+});
+=== lib/validation.ts ===
+export const validateEmail = (email: string): { isValid: boolean; error?: string } => {
+  if (!email) return { isValid: false, error: 'Email jest wymagany' }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email)) {
+    return { isValid: false, error: 'Nieprawidłowy format email' }
+  }
+  return { isValid: true }
+}
+
+export const validatePhone = (phone: string): { isValid: boolean; error?: string } => {
+  if (!phone) return { isValid: false, error: 'Telefon jest wymagany' }
+  const cleanPhone = phone.replace(/[\s\-\(\)]/g, '')
+  const phoneRegex = /^(?:\+48)?(?:\d{9})$/
+  if (!phoneRegex.test(cleanPhone)) {
+    return { isValid: false, error: 'Podaj 9 cyfr (np. 123456789 lub +48123456789)' }
+  }
+  return { isValid: true }
+}
+
+export const validatePostalCode = (code: string): { isValid: boolean; error?: string } => {
+  if (!code || code.length < 6) return { isValid: true } // Opcjonalne pole, waliduj tylko jeśli jest w pełni wpisane
+  const postalRegex = /^\d{2}-\d{3}$/
+  if (!postalRegex.test(code)) {
+    return { isValid: false, error: 'Format: XX-XXX (np. 00-950)' }
+  }
+  return { isValid: true }
+}
+
+export const formatPhone = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '')
+  if (cleaned.length <= 3) return cleaned
+  if (cleaned.length <= 6) return `${cleaned.slice(0, 3)} ${cleaned.slice(3)}`
+  return `${cleaned.slice(0, 3)} ${cleaned.slice(3, 6)} ${cleaned.slice(6, 9)}`
+}
+
+export const formatPostalCode = (value: string): string => {
+  const cleaned = value.replace(/\D/g, '')
+  if (cleaned.length <= 2) return cleaned
+  return `${cleaned.slice(0, 2)}-${cleaned.slice(2, 5)}`
+}
+
+=== lib/schemas.ts ===
+// File: lib/schemas.ts
+import { z } from 'zod';
+
+export const inquirySchema = z.object({
+  name: z.string().min(2, { message: 'Imię musi mieć co najmniej 2 znaki.' }),
+  phone: z.string().min(9, { message: 'Numer telefonu musi mieć co najmniej 9 cyfr.' }),
+  email: z.string().email({ message: 'Proszę podać poprawny adres e-mail.' }),
+  postalCode: z.string().regex(/^\d{2}-\d{3}$/, { message: 'Kod pocztowy musi być w formacie XX-XXX.' }),
+  message: z.string().min(10, { message: 'Wiadomość musi mieć co najmniej 10 znaków.' }).max(500),
+  company: z.string().optional(),
+  type: z.enum(['home_extension', 'conservatory', 'pergola', 'carport', 'other'], {
+    // KOREKTA: Zastosowano prawidłową składnię z jednym kluczem 'message' dla błędu walidacji.
+    message: 'Proszę wybrać prawidłowy typ konstrukcji.',
+  }),
+  consent: z.boolean().refine(val => val === true, {
+    message: 'Zgoda na przetwarzanie danych jest wymagana.',
+  }),
+  preferredDate: z.string().optional(),
+});
+
+// Typ LeadDTO wyeksportowany poza obiektem schematu.
+export type LeadDTO = z.infer<typeof inquirySchema>;
